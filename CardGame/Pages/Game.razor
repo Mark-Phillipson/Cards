@@ -1,0 +1,338 @@
+﻿@page "/game"
+@using System.Linq
+@using System.Threading.Tasks
+@using CardGame.Models
+@using CardGame.Services
+@inject DeckService DeckService
+
+<h3>Strip Jack Naked</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="StartGame">Start Game</button>
+    <button class="btn btn-secondary me-2" @onclick="ResetGame">Reset Game</button>
+    <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)">Play Card</button>
+    <span class="ms-3">@statusMessage</span>
+</div>
+
+<div class="row">
+    <div class="col-md-2 text-center">
+        <h6>Your last card</h6>
+        <div style="width:120px; height:170px; margin:0 auto;">
+            @if (LastHumanCard != null)
+            {
+                <img src="@LastHumanCard.ImageUrl" alt="@LastHumanCard.Rank of @LastHumanCard.Suit" style="width:120px; box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
+            }
+            else
+            {
+                <img src="/cards/Cards-Blank.svg" alt="no-card" style="width:120px;" />
+            }
+        </div>
+    </div>
+
+    <div class="col-md-4" style="@(CurrentPlayerIndex==0 ? "background:#f8f9fa;border-radius:6px;" : "")">
+        @if (Players.Count > 0)
+        {
+            <h5>@Players[0].Name (@Players[0].Deck.Count) @(CurrentPlayerIndex==0 ? "⬅️ Your turn" : "")</h5>
+        }
+        else
+        {
+            <h5>Player 1 (empty)</h5>
+        }
+        <div style="width:140px; height:170px; position:relative;">
+            @if (Players.Count > 0 && Players[0].Deck != null && Players[0].Deck.Count > 0)
+            {
+                var humanCount = Players[0].Deck.Count;
+                var showCount = Math.Min(6, humanCount);
+                // render bottom-to-top so top card is last
+                for (int i = 0; i < showCount; i++)
+                {
+                    var offset = i * 10; // horizontal offset per card
+                    var rot = -8 + i * 2; // small rotation so edges show
+                    var z = i; // increasing z-index
+                    var style = $"width:120px; position:absolute; left:{offset}px; top:{(10 + (showCount - i - 1) * 4)}px; transform:rotate({rot}deg); z-index:{z}; box-shadow:0 4px 6px rgba(0,0,0,0.15);";
+                    style += "opacity:1;";
+                    <img src="/cards/Cards-Blank.svg" alt="card-back" style="@style" />
+                }
+            }
+            else
+            {
+                <img src="/cards/Cards-Blank.svg" alt="face-down" style="width:120px; opacity:1;" />
+            }
+        </div>
+    </div>
+
+    <div class="col-md-4 text-center">
+        <h5>Center Pile (@Pile.Count)</h5>
+        <div style="position:relative; height:200px;">
+        @if (Pile.Count > 0)
+        {
+            var arr = Pile.ToArray();
+            // top card is arr[0] since Stack.ToArray returns LIFO; show only top
+            var top = arr.Length > 0 ? arr[0] : null;
+            if (top != null)
+            {
+                <img src="@top.ImageUrl" alt="@top.Rank of @top.Suit" style="width:160px; position:absolute; left:50%; transform:translateX(-50%) rotate(4deg); top:40px; box-shadow:0 6px 12px rgba(0,0,0,0.25); opacity:1;" />
+            }
+        }
+        else
+        {
+            <img src="/cards/Cards-Blank.svg" alt="empty" style="width:160px;" />
+        }
+        </div>
+    </div>
+
+    <div class="col-md-4 text-end" style="@(CurrentPlayerIndex==1 ? "background:#f8f9fa;border-radius:6px;" : "")">
+        @if (Players.Count > 1)
+        {
+            <h5>@Players[1].Name (@Players[1].Deck.Count) @(CurrentPlayerIndex==1 ? "⬅️ Their turn" : "")</h5>
+        }
+        else
+        {
+            <h5>Player 2 (CPU)</h5>
+        }
+        <div>
+            <img src="/cards/Cards-Blank.svg" alt="face-down" style="width:120px; opacity:1;" />
+        </div>
+    </div>
+</div>
+
+@if (GameOver)
+{
+    <div class="alert alert-success mt-3">@winnerMessage</div>
+}
+
+@code {
+    // ...existing code...
+    private List<Player> Players = new();
+    private Stack<Card> Pile = new();
+    private int CurrentPlayerIndex = 0; // 0 = human, 1 = CPU
+    private int PenaltyCount = 0;
+    private bool PenaltyActive = false;
+    private int? PenaltyPlayerIndex = null; // which player must play penalty cards
+    private Player? LastCourtPlayer = null;
+    private bool CanPlay = true;
+    private string statusMessage = "Click Start Game to begin.";
+    private bool GameOver = false;
+    private string winnerMessage = string.Empty;
+    private Card? LastHumanCard = null;
+
+    private bool IsHumanTurn => Players.Count > 0 && CurrentPlayerIndex == 0;
+
+    private void StartGame()
+    {
+        ResetGame();
+        DeckService.ResetDeck();
+        var dealt = DeckService.DealToPlayers(2);
+        Players = new List<Player>
+        {
+            new Player { Name = "Player 1", Deck = new Queue<Card>(dealt[0]) },
+            new Player { Name = "Player 2 (CPU)", Deck = new Queue<Card>(dealt[1]) }
+        };
+
+        CurrentPlayerIndex = 0; // left of dealer
+        statusMessage = "Player 1 to play.";
+        GameOver = false;
+    PenaltyActive = false;
+    PenaltyPlayerIndex = null;
+        StateHasChanged();
+    }
+
+    private void ResetGame()
+    {
+        Players = new List<Player>();
+        Pile = new Stack<Card>();
+        CurrentPlayerIndex = 0;
+        PenaltyCount = 0;
+        LastCourtPlayer = null;
+        statusMessage = "Click Start Game to begin.";
+        GameOver = false;
+        winnerMessage = string.Empty;
+    }
+
+    private async Task HumanPlay()
+    {
+        if (GameOver) return;
+        if (!IsHumanTurn) return;
+        if (Players.Count <= CurrentPlayerIndex) return;
+
+        await PlayWithCooldown(Players[CurrentPlayerIndex]);
+        await ContinueTurnsIfNeeded();
+    }
+
+    private async Task ContinueTurnsIfNeeded()
+    {
+        // After human play, let CPU act if it's their turn until human turn returns or game ends
+        while (!IsHumanTurn && !GameOver)
+        {
+            await Task.Delay(350);
+            // guard: ensure current player index is valid
+            if (Players == null || Players.Count == 0) break;
+            if (CurrentPlayerIndex < 0 || CurrentPlayerIndex >= Players.Count) break;
+            var current = Players[CurrentPlayerIndex];
+            if (current == null) break;
+            await PlayWithCooldown(current);
+        }
+    }
+
+    private async Task PlayWithCooldown(Player player)
+    {
+        if (!CanPlay) return;
+        CanPlay = false;
+        try
+        {
+            await PlayOneCard(player);
+        }
+        finally
+        {
+            // enforce a 3 second cooldown before next play is allowed
+            await Task.Delay(3000);
+            CanPlay = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task PlayOneCard(Player player)
+    {
+        await Task.Yield();
+        if (GameOver) return;
+        if (player is null)
+        {
+            // nothing to do
+            return;
+        }
+        // determine player index
+        var playerIndex = Players.IndexOf(player);
+        if (player.Deck == null || player.Deck.Count == 0)
+        {
+            // player has no cards -> they lose
+            EndGameOtherPlayer(player);
+            return;
+        }
+
+        var card = player.Deck.Dequeue();
+        if (card is null)
+        {
+            // defensively advance to next player
+            if (Players != null && Players.Count > 0)
+                CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
+            return;
+        }
+
+        // record last human card for display
+        if (playerIndex == 0)
+        {
+            LastHumanCard = card;
+        }
+
+        Pile.Push(card);
+        var rank = card.Rank ?? "?";
+        var suit = card.Suit ?? "?";
+        statusMessage = $"{player.Name} played {rank} of {suit}.";
+        if (IsCourt(card))
+        {
+            // court card played — set new penalty and make the next player the penalized player
+            var rnk = card.Rank ?? string.Empty;
+            PenaltyCount = CourtPenaltyForRank(rnk);
+            LastCourtPlayer = player;
+            // next player will be penalized
+            var next = (playerIndex + 1) % Players.Count;
+            PenaltyActive = true;
+            PenaltyPlayerIndex = next;
+            CurrentPlayerIndex = next;
+            statusMessage = $"{player.Name} played {rnk}. Player {CurrentPlayerIndex + 1} must play {PenaltyCount} card(s).";
+            StateHasChanged();
+            return;
+        }
+
+        // If a penalty is active, check whether this player is the penalized player
+        if (PenaltyActive && PenaltyPlayerIndex.HasValue)
+        {
+            if (playerIndex == PenaltyPlayerIndex.Value)
+            {
+                // penalized player has played one of their required cards
+                // if they played a court card above, penalty flow was handled already
+                // here it's a non-court card: decrement penalty, and if still >0 they must play again
+                PenaltyCount--;
+                if (PenaltyCount > 0)
+                {
+                    // same player must play again
+                    CurrentPlayerIndex = playerIndex;
+                    statusMessage = $"{player.Name} must play {PenaltyCount} more card(s).";
+                    StateHasChanged();
+                    return;
+                }
+
+                // Penalty exhausted without a court card — last court player takes the pile
+                PenaltyActive = false;
+                PenaltyPlayerIndex = null;
+                if (LastCourtPlayer != null)
+                {
+                    TakePile(LastCourtPlayer);
+                    var idx = Players.IndexOf(LastCourtPlayer);
+                    if (idx >= 0) CurrentPlayerIndex = idx;
+                    statusMessage = $"{(LastCourtPlayer?.Name ?? "Player")} wins the pile and will play next.";
+                    StateHasChanged();
+                    return;
+                }
+            }
+            else
+            {
+                // not the penalized player's turn — normal advance
+                CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
+                StateHasChanged();
+                return;
+            }
+        }
+
+    // Normal play and no penalty active -> advance to next player
+    CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
+        CheckForWin();
+        StateHasChanged();
+    }
+
+    private void TakePile(Player taker)
+    {
+        if (taker == null) return;
+        if (taker.Deck == null) taker.Deck = new System.Collections.Generic.Queue<Card>();
+        // take all cards from pile (bottom first)
+        var cards = Pile.ToArray();
+        Array.Reverse(cards); // now bottom -> top
+        foreach (var c in cards)
+            taker.Deck.Enqueue(c);
+
+        Pile.Clear();
+        PenaltyCount = 0;
+        LastCourtPlayer = null;
+    }
+
+    private void EndGameOtherPlayer(Player emptyPlayer)
+    {
+        var winner = Players.First(p => p != emptyPlayer);
+        GameOver = true;
+        winnerMessage = $"{winner.Name} has won the game!";
+        statusMessage = winnerMessage;
+    }
+
+    private void CheckForWin()
+    {
+        var nonEmpty = Players.Count(p => p.Deck.Count > 0);
+        if (nonEmpty == 1)
+        {
+            var winner = Players.First(p => p.Deck.Count > 0);
+            GameOver = true;
+            winnerMessage = $"{winner.Name} has won the game!";
+            statusMessage = winnerMessage;
+        }
+    }
+
+    private static bool IsCourt(Card card) => card.Rank is "J" or "Q" or "K" or "A";
+
+    private static int CourtPenaltyForRank(string rank) => rank switch
+    {
+        "J" => 1,
+        "Q" => 2,
+        "K" => 3,
+        "A" => 4,
+        _ => 0
+    };
+}
