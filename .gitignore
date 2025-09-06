@@ -1,0 +1,60 @@
+# .gitignore for Blazor / .NET projects
+# Exclude build outputs and common editor/OS artifacts
+
+# Build directories
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# VS Code (ignore workspace settings but keep if you intentionally track them, adjust if needed)
+.vscode/
+
+# NuGet
+*.nupkg
+project.lock.json
+packages/
+.nuget/
+
+# Publish output
+publish/
+
+# Dotnet watch/temp
+.dotnet_watch
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Node/npm
+node_modules/
+
+# Playwright / test artifacts
+playwright-report/
+
+# User secrets and local config
+secrets.json
+appsettings.Development.json
+
+# Misc
+*.db
+*.sqlite
+
+# Keep these in repo if you intentionally want them tracked:
+# - wwwroot/ (static assets, card SVGs etc.)
+# - README.md, LICENSE, and project source files
