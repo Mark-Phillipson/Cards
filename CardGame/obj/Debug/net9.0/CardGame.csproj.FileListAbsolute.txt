@@ -1131,10 +1131,10 @@ C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\refint\CardGame.dll
 C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\CardGame.pdb
 C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\ref\CardGame.dll
 c:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\CardGame.sourcelink.json
-C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.y9uorod7n8.wasm
-C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.l192aiheff.pdb
-C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.y9uorod7n8.wasm.gz
-C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.l192aiheff.pdb.gz
-C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\compressed\7xpmbr6x5l-y9uorod7n8.gz
-C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\compressed\cig06x3v20-l192aiheff.gz
-C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\compressed\e3g9x4izqn-z78wt8g40a.gz
+C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.bfw8xwo7w2.wasm
+C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.mpzhftvu1b.pdb
+C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.bfw8xwo7w2.wasm.gz
+C:\Users\MPhil\source\repos\Cards\CardGame\bin\Debug\net9.0\wwwroot\_framework\CardGame.mpzhftvu1b.pdb.gz
+C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\compressed\7xpmbr6x5l-bfw8xwo7w2.gz
+C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\compressed\cig06x3v20-mpzhftvu1b.gz
+C:\Users\MPhil\source\repos\Cards\CardGame\obj\Debug\net9.0\compressed\e3g9x4izqn-636sfdsu41.gz

@@ -267,6 +267,9 @@
                 PenaltyPlayerIndex = null;
                 if (LastCourtPlayer != null)
                 {
+                    // ensure the UI shows the last card that was played before we remove/transfer the pile
+                    StateHasChanged();
+                    await Task.Delay(1000);
                     TakePile(LastCourtPlayer);
                     var idx = Players.IndexOf(LastCourtPlayer);
                     if (idx >= 0) CurrentPlayerIndex = idx;
