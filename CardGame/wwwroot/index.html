@@ -26,6 +26,17 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
+    <script>
+        // Small helper to focus an element passed from Blazor
+        window.focusElement = (el) => {
+            try {
+                if (el && typeof el.focus === 'function') el.focus();
+            }
+            catch (e) {
+                console && console.warn && console.warn('focusElement error', e);
+            }
+        };
+    </script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 

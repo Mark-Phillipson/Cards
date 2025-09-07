@@ -4,11 +4,12 @@
 @using CardGame.Models
 @using CardGame.Services
 @inject DeckService DeckService
+@inject IJSRuntime JS
 
 <h3>Strip Jack Naked</h3>
 
 <div class="mb-3">
-    <button class="btn btn-primary me-2" @onclick="StartGame">Start Game</button>
+    <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">Start Game</button>
     <button class="btn btn-secondary me-2" @onclick="ResetGame">Reset Game</button>
     <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)">Play Card</button>
     @statusMessage
@@ -366,4 +367,22 @@
         "A" => 4,
         _ => 0
     };
+
+    private ElementReference startButton;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Move keyboard focus to the Start Game button so pressing Enter starts the game
+            try
+            {
+                await JS.InvokeVoidAsync("focusElement", startButton);
+            }
+            catch
+            {
+                // ignore JS errors — focusing is best-effort
+            }
+        }
+    }
 }
