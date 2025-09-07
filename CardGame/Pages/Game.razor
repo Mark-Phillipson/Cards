@@ -6,74 +6,396 @@
 @inject DeckService DeckService
 @inject IJSRuntime JS
 
-<h3>Strip Jack Naked</h3>
+<div class="western-header">
+    <h1 class="western-title">🤠 STRIP JACK NAKED 🤠</h1>
+    <div class="western-subtitle">~ A Wild West Card Showdown ~</div>
+</div>
 
 <style>
-    /* Animated CPU card moving to center */
+    /* Western Theme Styles */
+    body {
+        background: linear-gradient(45deg, #8B4513 0%, #CD853F 50%, #DEB887 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+    }
+    
+    .western-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D  50%, #CD853F 100%);
+        border: 4px solid #654321;
+        border-radius: 15px;
+        box-shadow: 
+            0 0 20px rgba(139, 69, 19, 0.7),
+            inset 0 0 20px rgba(255, 255, 255, 0.1);
+        position: relative;
+    }
+    
+    .western-header::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #DAA520, #B8860B, #FFD700, #B8860B);
+        border-radius: 17px;
+        z-index: -1;
+    }
+    
+    .western-title {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 2.5rem;
+        color: #FFFF99;
+        text-shadow: 
+            2px 2px 0px #654321,
+            4px 4px 8px rgba(0,0,0,0.8);
+        margin: 0;
+        letter-spacing: 2px;
+        font-weight: bold;
+    }
+    
+    .western-subtitle {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 1.1rem;
+        color: #FFFFFF;
+        margin-top: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+        font-style: italic;
+        font-weight: 500;
+    }
+
+    /* Western Button Styles */
+    .btn {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 3px solid #654321;
+        border-radius: 8px;
+        padding: 12px 24px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #FFD700 100%);
+        color: #000000;
+        border-color: #8B4513;
+        text-shadow: none;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 50%, #FFFF99 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        color: #000000;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #A0522D 0%, #CD853F 50%, #DEB887 100%);
+        color: #000000;
+        border-color: #654321;
+        text-shadow: none;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #228B22 0%, #32CD32 50%, #90EE90 100%);
+        color: #000000;
+        border-color: #006400;
+        text-shadow: none;
+    }
+
+    /* Western Game Area Styles */
+    .western-player-area {
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+        border: 3px solid #654321;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 
+            0 0 15px rgba(139, 69, 19, 0.6),
+            inset 0 0 15px rgba(255, 255, 255, 0.1);
+        position: relative;
+        height: fit-content;
+    }
+    
+    .western-player-area::before {
+        content: "";
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        border: 1px solid #DAA520;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+    
+    .western-player-area.active {
+        background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+        box-shadow: 
+            0 0 25px rgba(218, 165, 32, 0.8),
+            inset 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    
+    .western-center-area {
+        background: radial-gradient(circle, #654321 0%, #8B4513 50%, #A0522D 100%);
+        border: 4px solid #DAA520;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 
+            0 0 30px rgba(218, 165, 32, 0.7),
+            inset 0 0 25px rgba(0, 0, 0, 0.3);
+        position: relative;
+        height: fit-content;
+    }
+    
+    .western-center-area::before {
+        content: "★";
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2rem;
+        color: #FFD700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+
+    /* Western Typography */
+    h5 {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        color: #FFFFFF;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .status-message {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        color: #FFFFFF;
+        background: rgba(101, 67, 33, 0.95);
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: 2px solid #654321;
+        display: inline-block;
+        margin-left: 1rem;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    /* Western Progress Bars */
+    .western-progress {
+        background: linear-gradient(90deg, #654321 0%, #8B4513 100%);
+        border: 2px solid #DAA520;
+        border-radius: 10px;
+        height: 20px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .western-progress-bar {
+        background: linear-gradient(90deg, #DAA520 0%, #FFD700 50%, #FFFF99 100%);
+        border-radius: 8px;
+        height: 100%;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        transition: width 0.5s ease;
+    }
+    
+    .western-progress-bar.cpu {
+        background: linear-gradient(90deg, #DC143C 0%, #FF6347 50%, #FF7F7F 100%);
+        box-shadow: 0 0 10px rgba(220, 20, 60, 0.6);
+    }
+
+    /* Western Badge Styles */
+    .western-badge {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        border: 2px solid #654321;
+        border-radius: 50%;
+        padding: 8px 12px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    /* Penalty color classes: 1..4 */
+    .penalty-1 { 
+        background: linear-gradient(135deg, #DC143C 0%, #FF6347 100%);
+        color: #fff;
+        border-color: #8B0000;
+    }
+    .penalty-2 { 
+        background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+        color: #fff;
+        border-color: #FF4500;
+    }
+    .penalty-3 { 
+        background: linear-gradient(135deg, #FFD700 0%, #FFFF99 100%);
+        color: #654321;
+        border-color: #DAA520;
+    }
+    .penalty-4 { 
+        background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+        color: #fff;
+        border-color: #006400;
+    }
+
+    /* Western Card Animations */
     .animated-card {
         position: absolute;
         top: 40px;
-        /* start slightly smaller for animation */
         height: 120px;
-        /* CPU will start from the left side */
         left: 15%;
         transition: left 600ms ease, height 600ms ease, transform 600ms ease, opacity 300ms ease;
         z-index: 60;
         transform: rotate(0deg);
-        box-shadow:0 6px 12px rgba(0,0,0,0.25);
+        box-shadow: 0 8px 16px rgba(139, 69, 19, 0.4);
+        border: 2px solid #DAA520;
+        border-radius: 8px;
+        background-color: #FFFEF7;
+        padding: 4px;
     }
+    
     .animated-card.to-center {
-    left: 50%;
-    transform: translateX(-50%) rotate(-20deg);
+        left: 50%;
+        transform: translateX(-50%) rotate(-20deg);
         height: 160px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
     }
-    /* Player animated card starts from right and moves to center */
+    
     .animated-card.player { left: 85%; }
-    .animated-card.player.to-center { left: 50%; transform: translateX(-50%) rotate(20deg); height:160px; }
-    /* Penalty color classes: 1..4 */
-    .penalty-1 { background:#dc3545; color:#fff; } /* red */
-    .penalty-2 { background:#fd7e14; color:#fff; } /* orange */
-    .penalty-3 { background:#ffc107; color:#000; } /* yellow */
-    .penalty-4 { background:#198754; color:#fff; } /* green */
-    /* Pile-to-hand animation: centered -> move left or right */
+    .animated-card.player.to-center { 
+        left: 50%; 
+        transform: translateX(-50%) rotate(20deg); 
+        height: 160px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+    
+    /* All card images get consistent styling */
+    img[src*="/cards/"] {
+        background-color: #FFFEF7;
+        border: 1px solid #E8E8E8;
+        border-radius: 6px;
+        padding: 3px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    
+    /* Pile-to-hand animation with western flair */
     .pile-anim {
         position: absolute;
         left: 50%;
         top: 40px;
         transform: translateX(-50%) rotate(4deg) scale(1);
-        height:160px;
+        height: 160px;
         transition: transform 700ms cubic-bezier(.2,.9,.2,1), opacity 300ms ease;
         z-index: 80;
+        border: 2px solid #DAA520;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        background-color: #FFFEF7;
+        padding: 4px;
     }
-    .pile-anim.to-left { transform: translateX(-250%) rotate(-8deg) scale(0.9); }
-    .pile-anim.to-right { transform: translateX(150%) rotate(8deg) scale(0.9); }
+    
+    .pile-anim.to-left { 
+        transform: translateX(-250%) rotate(-8deg) scale(0.9);
+        box-shadow: 0 0 15px rgba(218, 165, 32, 0.8);
+    }
+    
+    .pile-anim.to-right { 
+        transform: translateX(150%) rotate(8deg) scale(0.9);
+        box-shadow: 0 0 15px rgba(218, 165, 32, 0.8);
+    }
+    
+    /* Western Alert Styles */
+    .alert-success {
+        background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+        border: 3px solid #006400;
+        color: #FFFFFF;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(34, 139, 34, 0.6);
+        font-weight: 600;
+    }
+
+    /* Force single line layout */
+    .game-layout {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        gap: 1rem;
+        min-height: 300px;
+    }
+    
+    .player-column {
+        flex: 1;
+        min-width: 0; /* Allow flex items to shrink below content size */
+        max-width: 33.333%;
+    }
+    
+    .center-column {
+        flex: 1;
+        min-width: 0;
+        max-width: 33.333%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    /* Responsive adjustments for very small screens */
+    @@media (max-width: 768px) {
+        .game-layout {
+            gap: 0.5rem;
+        }
+        
+        .western-title {
+            font-size: 2rem;
+        }
+        
+        .western-subtitle {
+            font-size: 1rem;
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+        }
+        
+        .status-message {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+        }
+    }
 </style>
 
 <div class="mb-3">
-    <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">Start Game</button>
-    <button class="btn btn-secondary me-2" @onclick="ResetGame">Reset Game</button>
-    <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)" @ref="playButton">Play Card</button>
-    @statusMessage
+    <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">🎲 Start New Game</button>
+    <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)" @ref="playButton">🂡 Play Card</button>
+    <span class="status-message">@statusMessage</span>
 </div>
 
-<div class="row">
+<div class="game-layout">
 
-    <div class="col-md-4" style="@(CurrentPlayerIndex==0 ? "background:#f8f9fa;border-radius:6px;" : "")">
+    <div class="player-column western-player-area @(CurrentPlayerIndex==0 ? "active" : "")">
         @if (Players.Count > 0)
         {
             var isPenalized0 = PenaltyActive && PenaltyPlayerIndex.HasValue && PenaltyPlayerIndex.Value == 0;
             <h5>
-                @Players[0].Name
-                @(CurrentPlayerIndex==0 ? " ⬅️ Your turn" : "")
+                🤠 @Players[0].Name
+                @(CurrentPlayerIndex==0 ? " ⬅️ Your Draw!" : "")
                 @if (isPenalized0)
                 {
-                    <span class="badge ms-2 @PenaltyBadgeClass(PenaltyCount)" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
+                    <span class="badge western-badge ms-2 @PenaltyBadgeClass(PenaltyCount)" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
                 }
             </h5>
         }
         else
         {
-            <h5>Player 1 (empty)</h5>
+            <h5>🤠 Player 1 (empty)</h5>
         }
     <!-- deck graphic removed for player 1 per UI update; keep spacer for layout -->
     
@@ -103,8 +425,8 @@
             var total = TotalCardsCount;
             var pct = total == 0 ? 0 : (int)Math.Round(100.0 * (Players[0].Deck?.Count ?? 0) / total);
             <div class="mt-2" style="width:100%;">
-                <div class="progress" style="height:12px; background:#e9ecef; border-radius:6px;">
-                    <div class="progress-bar" role="progressbar" style="width:@pct%; background:#0d6efd;" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100">
+                <div class="western-progress">
+                    <div class="western-progress-bar" role="progressbar" style="width:@pct%;" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100">
                         <span class="visually-hidden">@pct% of cards</span>
                     </div>
                 </div>
@@ -112,8 +434,8 @@
         }
     </div>
 
-    <div class="col-md-4 text-center">
-        <h5>Center Pile (@Pile.Count)</h5>
+    <div class="center-column western-center-area">
+        <h5>🃏 Center Pile (@Pile.Count) 🃏</h5>
         <div style="position:relative; height:200px;">
         @if (Pile.Count > 0)
         {
@@ -151,22 +473,22 @@
         </div>
     </div>
 
-    <div class="col-md-4 text-end" style="@(CurrentPlayerIndex==1 ? "background:#f8f9fa;border-radius:6px;" : "")">
+    <div class="player-column western-player-area @(CurrentPlayerIndex==1 ? "active" : "")" style="text-align: right;">
         @if (Players.Count > 1)
         {
             var isPenalized1 = PenaltyActive && PenaltyPlayerIndex.HasValue && PenaltyPlayerIndex.Value == 1;
             <h5>
-                @Players[1].Name
-                @(CurrentPlayerIndex==1 ? " ⬅️ Their turn" : "")
+                🤖 @Players[1].Name
+                @(CurrentPlayerIndex==1 ? " ⬅️ Their Draw!" : "")
                 @if (isPenalized1)
                 {
-                    <span class="badge ms-2 @PenaltyBadgeClass(PenaltyCount)" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
+                    <span class="badge western-badge ms-2 @PenaltyBadgeClass(PenaltyCount)" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
                 }
             </h5>
         }
         else
         {
-            <h5>Player 2 (CPU)</h5>
+            <h5>🤖 Player 2 (CPU)</h5>
         }
         @* single CPU card (back) shown left-aligned; no duplicate deck preview *@
         <div style="margin-top:6px; display:flex; justify-content:flex-start;">
@@ -189,8 +511,8 @@
             var total = TotalCardsCount;
             var pct2 = total == 0 ? 0 : (int)Math.Round(100.0 * (Players[1].Deck?.Count ?? 0) / total);
             <div class="mt-2" style="width:100%;">
-                <div class="progress" style="height:12px; background:#e9ecef; border-radius:6px;">
-                    <div class="progress-bar" role="progressbar" style="width:@pct2%; background:#198754;" aria-valuenow="@pct2" aria-valuemin="0" aria-valuemax="100">
+                <div class="western-progress">
+                    <div class="western-progress-bar cpu" role="progressbar" style="width:@pct2%;" aria-valuenow="@pct2" aria-valuemin="0" aria-valuemax="100">
                         <span class="visually-hidden">@pct2% of cards</span>
                     </div>
                 </div>
@@ -241,7 +563,18 @@
 
     private async Task StartGame()
     {
-        ResetGame();
+        // perform reset logic inline (previously in ResetGame)
+        Players = new List<Player>();
+        Pile = new Stack<Card>();
+        CurrentPlayerIndex = 0;
+        PenaltyCount = 0;
+        LastCourtPlayer = null;
+        statusMessage = "Click Start Game to begin.";
+        GameOver = false;
+        winnerMessage = string.Empty;
+        LastHumanCard = null;
+        LastCpuCard = null;
+
         DeckService.ResetDeck();
         var dealt = DeckService.DealToPlayers(2);
         Players = new List<Player>
@@ -253,8 +586,8 @@
         CurrentPlayerIndex = 0; // left of dealer
         statusMessage = "Player 1 to play.";
         GameOver = false;
-    PenaltyActive = false;
-    PenaltyPlayerIndex = null;
+        PenaltyActive = false;
+        PenaltyPlayerIndex = null;
         StateHasChanged();
 
         // After UI has rendered, move focus to the Play Card button so Enter can be used
@@ -268,20 +601,6 @@
         {
             // best-effort, ignore JS errors
         }
-    }
-
-    private void ResetGame()
-    {
-        Players = new List<Player>();
-        Pile = new Stack<Card>();
-        CurrentPlayerIndex = 0;
-        PenaltyCount = 0;
-        LastCourtPlayer = null;
-        statusMessage = "Click Start Game to begin.";
-        GameOver = false;
-        winnerMessage = string.Empty;
-    LastHumanCard = null;
-    LastCpuCard = null;
     }
 
     private async Task HumanPlay()

@@ -1,1 +1,1 @@
-When player one lays a card in the centre pile can it be rotated to the left by about 20 degrees and when player two lays a card in the centre pile can it be rotated to the right by about 20 degrees
+Can we do away with the reset button and change the start game button to start new game instead I don't think we need to change any functionality it's just the button caption that needs to change and the removing of the reset game and any code it has behind it as it is superfluous
