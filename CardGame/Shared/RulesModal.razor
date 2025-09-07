@@ -1,0 +1,97 @@
+@using Microsoft.AspNetCore.Components
+
+@* Simple reusable modal for showing the game's rules. *@
+@if (Visible)
+{
+    <div class="rules-modal-backdrop" @onclick="CloseOnBackdrop">
+        <div class="rules-modal" @onclick:stopPropagation>
+            <div class="rules-header">
+                <h3>Strip Jack Naked — Rules</h3>
+                <button class="btn btn-secondary" @onclick="Close">✖</button>
+            </div>
+            <div class="rules-body">
+                <h4>Overview</h4>
+                <p>This is a two-player card game using a standard 52-card deck. Cards are dealt evenly and players take turns placing the top card into the center pile. Court cards (J, Q, K, A) create penalties for the next player. The goal is to win all cards.</p>
+
+                <h4>Turns</h4>
+                <ul>
+                    <li>Player flips their top card and places it on the center pile.</li>
+                    <li>Cards 2–10: normal — play passes to the next player.</li>
+                    <li>Jack: next player must play 1 card.</li>
+                    <li>Queen: next player must play 2 cards.</li>
+                    <li>King: next player must play 3 cards.</li>
+                    <li>Ace: next player must play 4 cards.</li>
+                </ul>
+
+                <h4>Penalty Resolution</h4>
+                <ul>
+                    <li>When a court card is played the following player must play the required number of cards one-by-one.</li>
+                    <li>If during the penalty the penalized player plays another court card, the obligation passes to the next player with the new required count.</li>
+                    <li>If the penalized player fails to play a court card, the player who played the last court card takes the entire pile and places it at the bottom of their deck.</li>
+                </ul>
+
+                <h4>Winning</h4>
+                <p>Play continues until one player has all the cards; that player wins.</p>
+
+                <hr />
+                <p style="font-size:0.9rem; color:var(--bs-secondary-text, #444);">Note: this modal mirrors the rules used by the game logic. Close to continue playing.</p>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> VisibleChanged { get; set; }
+
+    private async Task Close()
+    {
+        Visible = false;
+        await VisibleChanged.InvokeAsync(Visible);
+    }
+
+    private async Task CloseOnBackdrop()
+    {
+        await Close();
+    }
+}
+
+<style>
+    .rules-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 1rem;
+    }
+
+    .rules-modal {
+        background: linear-gradient(180deg,#fff,#f8f4ef);
+        border: 3px solid #654321;
+        border-radius: 10px;
+        max-width: 820px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        padding: 1rem;
+        color: #222;
+    }
+
+    .rules-header {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:0.5rem;
+    }
+
+    .rules-header h3 { margin:0; }
+
+    .rules-body { margin-top:0.75rem; max-height:60vh; overflow:auto; }
+
+    .rules-body h4 { margin-bottom:0.25rem; }
+</style>

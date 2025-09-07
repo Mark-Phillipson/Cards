@@ -3,6 +3,7 @@
 @using System.Threading.Tasks
 @using CardGame.Models
 @using CardGame.Services
+@using CardGame.Shared
 @inject DeckService DeckService
 @inject IJSRuntime JS
 
@@ -391,6 +392,7 @@
 <div class="mb-3">
     <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">🎲 Start New Game</button>
     <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)" @ref="playButton">🂡 Play Card</button>
+    <button class="btn btn-secondary ms-2" @onclick="() => rulesVisible = true">📜 Rules</button>
     <span class="status-message">@statusMessage</span>
 </div>
 
@@ -548,7 +550,13 @@
     <div class="alert alert-success mt-3">@winnerMessage</div>
 }
 
+@* Rules modal component instance (bind visibility) *@
+<RulesModal @bind-Visible="rulesVisible" />
+
 @code {
+    // controls visibility of the rules modal
+    private bool rulesVisible = false;
+
     // ...existing code...
     private List<Player> Players = new();
     private Stack<Card> Pile = new();
