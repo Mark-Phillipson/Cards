@@ -481,7 +481,9 @@
         }
         else
         {
-            <img src="/cards/Cards-Blank.svg" alt="empty" style="height:160px;" />
+            // Don't show the blank card image when the pile is empty — render
+            // an empty spacer to preserve layout but avoid the white card graphic.
+            <div style="height:160px;"></div>
         }
         @* Animated CPU card overlays *@
         @if (IsAnimatingCpuCard && !string.IsNullOrEmpty(AnimCpuCardUrl))
