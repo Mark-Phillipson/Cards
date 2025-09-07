@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Strip Jack Naked favicon">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0%" stop-color="#D4A017"/>
+      <stop offset="100%" stop-color="#8B4513"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="10" fill="#3b2a1f"/>
+  <rect x="6" y="6" width="52" height="52" rx="6" fill="url(#g)" stroke="#2a1a12" stroke-width="2"/>
+  <!-- Stylised playing card 'J' in centre -->
+  <g transform="translate(12,8) scale(0.7)" fill="#fff" font-family="Segoe UI, Arial, sans-serif">
+    <rect x="6" y="6" width="40" height="56" rx="4" fill="#FFFEF7" stroke="#E8E8E8" stroke-width="1.5" />
+    <text x="12" y="26" font-size="18" font-weight="700" fill="#8B4513">J</text>
+    <text x="30" y="50" font-size="8" fill="#8B4513">♣</text>
+  </g>
+</svg>
