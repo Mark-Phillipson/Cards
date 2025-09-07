@@ -101,7 +101,7 @@ The goal is to win all cards.
 * Display messages:
 
   * “Player X must play 3 cards.”
-  * “Player Y wins the pile!”
+  * “Player 1 wins the pile!” (UI now displays "Player 1" or "Player 2" depending on who won)
   * “Player Z has won the game!”
 
 ---

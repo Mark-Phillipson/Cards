@@ -1,1 +1,1 @@
-Can we have it when we play a card and run the animation just before it runs we need to hide the player one top card if it is play one that is playing it player two is fine as it's just the back anyway
+Where it's saying player wins the pile can we make sure it says player one or player two depending on who just won the pile
