@@ -6,6 +6,7 @@
 @using CardGame.Shared
 @inject DeckService DeckService
 @inject IJSRuntime JS
+@inject CardGame.Services.SoundService SoundService
 
 <div class="western-header">
     <h1 class="western-title">🤠 STRIP JACK NAKED 🤠</h1>
@@ -864,6 +865,16 @@
                     else if (idx == 1) winnerLabel = "Player 2";
                     else winnerLabel = taker?.Name ?? "Player";
                     statusMessage = $"{winnerLabel} wins the pile.";
+                    // play round win sound (fire-and-forget)
+                    // If player 2 wins the pile, play the game-lose sound instead
+                    if (idx == 1)
+                    {
+                        _ = SoundService.PlayAsync("game-lose");
+                    }
+                    else
+                    {
+                        _ = SoundService.PlayAsync("round-win");
+                    }
                     StateHasChanged();
                     return;
                 }
@@ -950,6 +961,8 @@
     GameOver = true;
     winnerMessage = $"{emptyPlayer.Name} has lost the game.";
     statusMessage = winnerMessage;
+    // play game-lost sound
+    _ = SoundService.PlayAsync("game-lose");
     }
 
     private void CheckForWin()
@@ -961,6 +974,8 @@
             GameOver = true;
             winnerMessage = $"{winner.Name} has won the game!";
             statusMessage = winnerMessage;
+            // play game win sound
+            _ = SoundService.PlayAsync("game-win");
         }
     }
 

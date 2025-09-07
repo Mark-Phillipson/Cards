@@ -1,1 +1,1 @@
-It appears the first time we play the animation starts at the correct location however after the player 2 has had a go and then player one has a go the animation does not play correctly.
+ can we plan how to add sound to the application for example when a player wins a round? and another one when the player wins the game and a completely different one when a player loses the game
