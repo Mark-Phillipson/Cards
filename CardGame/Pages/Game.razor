@@ -216,14 +216,19 @@
     {
         if (!CanPlay) return;
         CanPlay = false;
+        // capture player index now so we can decide whether to apply the CPU delay
+        var playerIndex = Players?.IndexOf(player) ?? -1;
         try
         {
             await PlayOneCard(player);
         }
         finally
         {
-            // enforce a 1 second cooldown before next play is allowed
-            await Task.Delay(1000);
+            // enforce a 1 second cooldown before next play is allowed, but only for CPU players
+            if (playerIndex != 0)
+            {
+                await Task.Delay(1000);
+            }
             CanPlay = true;
             StateHasChanged();
         }

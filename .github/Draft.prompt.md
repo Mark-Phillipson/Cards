@@ -1,4 +1,3 @@
-Whenever the play card becomes available always move the keyboard focus to the button so that a user can just hit enter to play the card. 
+Currently there is a one second delay after each card is played can we have this delay only apply to the CPU and not the player
 
-Note: Implemented focus transfer to the Play Card button whenever it becomes enabled by tracking the enabled state and focusing via JS interop (`focusElement`) in `CardGame/Pages/Game.razor`.
-
+Note: Implemented CPU-only cooldown: the 1 second delay in `PlayWithCooldown` now runs only when a CPU (non-player) plays a card.
