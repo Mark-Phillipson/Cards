@@ -23,13 +23,13 @@
         box-shadow:0 6px 12px rgba(0,0,0,0.25);
     }
     .animated-card.to-center {
-        left: 50%;
-        transform: translateX(-50%) rotate(-4deg);
+    left: 50%;
+    transform: translateX(-50%) rotate(-20deg);
         height: 160px;
     }
     /* Player animated card starts from right and moves to center */
     .animated-card.player { left: 85%; }
-    .animated-card.player.to-center { left: 50%; transform: translateX(-50%) rotate(4deg); height:160px; }
+    .animated-card.player.to-center { left: 50%; transform: translateX(-50%) rotate(20deg); height:160px; }
     /* Penalty color classes: 1..4 */
     .penalty-1 { background:#dc3545; color:#fff; } /* red */
     .penalty-2 { background:#fd7e14; color:#fff; } /* orange */
@@ -76,7 +76,7 @@
             <h5>Player 1 (empty)</h5>
         }
     <!-- deck graphic removed for player 1 per UI update; keep spacer for layout -->
-    <div style="width:100%; height:170px;"></div>
+    
         @* next human card (top of their deck) *@
         <div style="margin-top:6px;">
                 @{
@@ -122,7 +122,8 @@
             var top = arr.Length > 0 ? arr[0] : null;
             if (top != null)
             {
-                <img src="@top.ImageUrl" alt="@top.Rank of @top.Suit" style="height:160px; position:absolute; left:50%; transform:translateX(-50%) rotate(4deg); top:40px; box-shadow:0 6px 12px rgba(0,0,0,0.25); opacity:1;" />
+                var rotateDeg = (LastPlayedByIndex == 0) ? -20 : 20;
+                <img src="@top.ImageUrl" alt="@top.Rank of @top.Suit" style="@($"height:160px; position:absolute; left:50%; transform:translateX(-50%) rotate({rotateDeg}deg); top:40px; box-shadow:0 6px 12px rgba(0,0,0,0.25); opacity:1;")" />
             }
         }
         else
@@ -132,11 +133,11 @@
         @* Animated CPU card overlays *@
         @if (IsAnimatingCpuCard && !string.IsNullOrEmpty(AnimCpuCardUrl))
         {
-            <img src="@AnimCpuCardUrl" class="animated-card @(AnimCpuToCenter ? "to-center" : "")" style="opacity:1;" />
+            <img src="@AnimCpuCardUrl" class="animated-card player @(AnimCpuToCenter ? "to-center" : "")" style="opacity:1;" />
         }
         @if (IsAnimatingPlayerCard && !string.IsNullOrEmpty(AnimPlayerCardUrl))
         {
-            <img src="@AnimPlayerCardUrl" class="animated-card player @(AnimPlayerToCenter ? "to-center" : "")" style="opacity:1;" />
+            <img src="@AnimPlayerCardUrl" class="animated-card @(AnimPlayerToCenter ? "to-center" : "")" style="opacity:1;" />
         }
         @if (IsAnimatingTakePile && AnimPileCards != null && AnimPileCards.Length > 0)
         {
@@ -218,6 +219,7 @@
     private string winnerMessage = string.Empty;
     private Card? LastHumanCard = null;
     private Card? LastCpuCard = null;
+    private int? LastPlayedByIndex = null; // which player played the top pile card (0=human,1=cpu)
     // animation state for CPU play
     private bool IsAnimatingCpuCard = false;
     private bool AnimCpuToCenter = false;
@@ -427,6 +429,8 @@
                 var dequeued = player.Deck.Dequeue();
                 // push the dequeued card into the pile
                 Pile.Push(dequeued);
+                // record who played this card so the top-card rotation can reflect player side
+                LastPlayedByIndex = playerIndex;
                 // record last played for display
                 if (playerIndex == 0) LastHumanCard = dequeued;
                 else if (playerIndex == 1) LastCpuCard = dequeued;
@@ -486,7 +490,7 @@
                     await TakePileAsync(LastCourtPlayer);
                     var idx = Players.IndexOf(LastCourtPlayer);
                     if (idx >= 0) CurrentPlayerIndex = idx;
-                    statusMessage = $"{(LastCourtPlayer?.Name ?? "Player")} wins the pile and will play next.";
+                    statusMessage = $"{(LastCourtPlayer?.Name ?? "Player")} wins the pile.";
                     StateHasChanged();
                     return;
                 }

@@ -1,1 +1,1 @@
-Now can we make these play one the same height as the player two CPU cards? They are a bit taller than the CPU cards right now
+When player one lays a card in the centre pile can it be rotated to the left by about 20 degrees and when player two lays a card in the centre pile can it be rotated to the right by about 20 degrees
