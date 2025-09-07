@@ -20,7 +20,15 @@
     <div class="col-md-4" style="@(CurrentPlayerIndex==0 ? "background:#f8f9fa;border-radius:6px;" : "")">
         @if (Players.Count > 0)
         {
-            <h5>@Players[0].Name @(CurrentPlayerIndex==0 ? "⬅️ Your turn" : "")</h5>
+            var isPenalized0 = PenaltyActive && PenaltyPlayerIndex.HasValue && PenaltyPlayerIndex.Value == 0;
+            <h5>
+                @Players[0].Name
+                @(CurrentPlayerIndex==0 ? " ⬅️ Your turn" : "")
+                @if (isPenalized0)
+                {
+                    <span class="badge bg-danger ms-2" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
+                }
+            </h5>
         }
         else
         {
@@ -78,7 +86,15 @@
     <div class="col-md-4 text-end" style="@(CurrentPlayerIndex==1 ? "background:#f8f9fa;border-radius:6px;" : "")">
         @if (Players.Count > 1)
         {
-            <h5>@Players[1].Name @(CurrentPlayerIndex==1 ? "⬅️ Their turn" : "") </h5>
+            var isPenalized1 = PenaltyActive && PenaltyPlayerIndex.HasValue && PenaltyPlayerIndex.Value == 1;
+            <h5>
+                @Players[1].Name
+                @(CurrentPlayerIndex==1 ? " ⬅️ Their turn" : "")
+                @if (isPenalized1)
+                {
+                    <span class="badge bg-danger ms-2" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
+                }
+            </h5>
         }
         else
         {
@@ -287,7 +303,7 @@
             PenaltyActive = true;
             PenaltyPlayerIndex = next;
             CurrentPlayerIndex = next;
-            statusMessage = $"{player.Name} played {rnk}. Player {CurrentPlayerIndex + 1} must play {PenaltyCount} card(s).";
+            statusMessage = $"{player.Name} played {rnk}. Required cards: {PenaltyCount}";
             StateHasChanged();
             return;
         }
@@ -305,7 +321,7 @@
                 {
                     // same player must play again
                     CurrentPlayerIndex = playerIndex;
-                    statusMessage = $"{player.Name} must play {PenaltyCount} more card(s).";
+                    statusMessage = $"Required cards remaining: {PenaltyCount}";
                     StateHasChanged();
                     return;
                 }

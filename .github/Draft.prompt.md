@@ -1,3 +1,3 @@
-Currently there is a one second delay after each card is played can we have this delay only apply to the CPU and not the player
+ when a house card is played can the number of cards that the opposing player has to lay down be shown in the section where it says your turn or their turn and make this number more prominent. it should automatically rundown as each card is played
 
-Note: Implemented CPU-only cooldown: the 1 second delay in `PlayWithCooldown` now runs only when a CPU (non-player) plays a card.
+Note: Implemented prominent penalty counter shown as a red badge next to each player's name when they are the penalized player; the `statusMessage` also displays the required count and it updates as cards are played.
