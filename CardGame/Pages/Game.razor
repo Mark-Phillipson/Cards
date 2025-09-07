@@ -13,21 +13,23 @@
     .animated-card {
         position: absolute;
         top: 40px;
-        width: 120px;
-        left: 85%;
-        transition: left 600ms ease, width 600ms ease, transform 600ms ease, opacity 300ms ease;
+        /* start slightly smaller for animation */
+        height: 120px;
+        /* CPU will start from the left side */
+        left: 15%;
+        transition: left 600ms ease, height 600ms ease, transform 600ms ease, opacity 300ms ease;
         z-index: 60;
         transform: rotate(0deg);
         box-shadow:0 6px 12px rgba(0,0,0,0.25);
     }
     .animated-card.to-center {
         left: 50%;
-        transform: translateX(-50%) rotate(4deg);
-        width: 160px;
+        transform: translateX(-50%) rotate(-4deg);
+        height: 160px;
     }
-    /* Player animated card starts from left and moves to center */
-    .animated-card.player { left: 15%; }
-    .animated-card.player.to-center { left: 50%; transform: translateX(-50%) rotate(-4deg); width:160px; }
+    /* Player animated card starts from right and moves to center */
+    .animated-card.player { left: 85%; }
+    .animated-card.player.to-center { left: 50%; transform: translateX(-50%) rotate(4deg); height:160px; }
     /* Penalty color classes: 1..4 */
     .penalty-1 { background:#dc3545; color:#fff; } /* red */
     .penalty-2 { background:#fd7e14; color:#fff; } /* orange */
@@ -39,7 +41,7 @@
         left: 50%;
         top: 40px;
         transform: translateX(-50%) rotate(4deg) scale(1);
-        width:160px;
+        height:160px;
         transition: transform 700ms cubic-bezier(.2,.9,.2,1), opacity 300ms ease;
         z-index: 80;
     }
@@ -75,16 +77,24 @@
         }
     <!-- deck graphic removed for player 1 per UI update; keep spacer for layout -->
     <div style="width:100%; height:170px;"></div>
-        @* last human card (reduced size for symmetry with CPU) *@
+        @* next human card (top of their deck) *@
         <div style="margin-top:6px;">
-            @if (LastHumanCard != null)
-            {
-                <img src="@LastHumanCard.ImageUrl" alt="@LastHumanCard.Rank of @LastHumanCard.Suit" style="width:90px; box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
-            }
-            else
-            {
-                <img src="/cards/Cards-Blank.svg" alt="no-card" style="width:90px;" />
-            }
+                @{
+                    var next = GetNextCardForPlayer(0);
+                    if (next != null)
+                    {
+                        /* Show the human's top card face-up (right-aligned) so they can see it before playing */
+                        <div style="display:flex; justify-content:flex-end;">
+                            <img src="@next.ImageUrl" alt="@next.Rank of @next.Suit" style="height:160px; box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="display:flex; justify-content:flex-end;">
+                            <img src="/cards/Cards-Blank.svg" alt="no-card" style="height:160px;" />
+                        </div>
+                    }
+                }
         </div>
 
         @* progress meter showing player's share of the total cards (players' decks + pile) *@
@@ -112,12 +122,12 @@
             var top = arr.Length > 0 ? arr[0] : null;
             if (top != null)
             {
-                <img src="@top.ImageUrl" alt="@top.Rank of @top.Suit" style="width:160px; position:absolute; left:50%; transform:translateX(-50%) rotate(4deg); top:40px; box-shadow:0 6px 12px rgba(0,0,0,0.25); opacity:1;" />
+                <img src="@top.ImageUrl" alt="@top.Rank of @top.Suit" style="height:160px; position:absolute; left:50%; transform:translateX(-50%) rotate(4deg); top:40px; box-shadow:0 6px 12px rgba(0,0,0,0.25); opacity:1;" />
             }
         }
         else
         {
-            <img src="/cards/Cards-Blank.svg" alt="empty" style="width:160px;" />
+            <img src="/cards/Cards-Blank.svg" alt="empty" style="height:160px;" />
         }
         @* Animated CPU card overlays *@
         @if (IsAnimatingCpuCard && !string.IsNullOrEmpty(AnimCpuCardUrl))
@@ -157,18 +167,18 @@
         {
             <h5>Player 2 (CPU)</h5>
         }
-        <div>
-            <img src="/cards/Cards-Blank.svg" alt="face-down" style="width:120px; opacity:1;" />
-        </div>
-        @* last CPU card (reduced size for symmetry) *@
-        <div style="margin-top:6px;">
-            @if (LastCpuCard != null)
-            {
-                <img src="@LastCpuCard.ImageUrl" alt="@LastCpuCard.Rank of @LastCpuCard.Suit" style="width:90px; box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
-            }
-            else
-            {
-                <img src="/cards/Cards-Blank.svg" alt="no-card" style="width:90px;" />
+        @* single CPU card (back) shown left-aligned; no duplicate deck preview *@
+        <div style="margin-top:6px; display:flex; justify-content:flex-start;">
+            @{ 
+                var nextCpu = GetNextCardForPlayer(1);
+                if (nextCpu != null)
+                {
+                    <img src="/cards/Cards-Reverse.svg" alt="face-down" style="height:160px; box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
+                }
+                else
+                {
+                    <img src="/cards/Cards-Blank.svg" alt="no-card" style="height:160px;" />
+                }
             }
         </div>
 
@@ -337,10 +347,21 @@
             return;
         }
 
-        var card = player.Deck.Dequeue();
+        // Peek at the top card for animation/preview but don't remove it until after animation
+        Card? card = null;
+        try
+        {
+            card = player.Deck?.Peek();
+        }
+        catch
+        {
+            // fall back to enumerating first element
+            card = player.Deck?.FirstOrDefault();
+        }
+
         if (card is null)
         {
-            // defensively advance to next player
+            // no card available — defensively advance
             if (Players != null && Players.Count > 0)
                 CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
             return;
@@ -397,8 +418,26 @@
             }
         }
 
-        // finally, place the card on the pile
-        Pile.Push(card);
+        // dequeue the card (now that animation/preview is complete) and place it on the pile
+        try
+        {
+            // remove the top card from the player's deck — this should be the same card we peeked
+            if (player.Deck != null && player.Deck.Count > 0)
+            {
+                var dequeued = player.Deck.Dequeue();
+                // push the dequeued card into the pile
+                Pile.Push(dequeued);
+                // record last played for display
+                if (playerIndex == 0) LastHumanCard = dequeued;
+                else if (playerIndex == 1) LastCpuCard = dequeued;
+                card = dequeued; // ensure subsequent logic refers to the dequeued card
+            }
+        }
+        catch
+        {
+            // fallback: if dequeue failed, still push the peeked card
+            Pile.Push(card);
+        }
         var rank = card.Rank ?? "?";
         var suit = card.Suit ?? "?";
         statusMessage = $"{player.Name} played {rank} of {suit}.";
@@ -560,6 +599,23 @@
             4 => "penalty-4",
             _ => "bg-secondary"
         };
+    }
+
+    private Card? GetNextCardForPlayer(int playerIndex)
+    {
+        if (Players == null || playerIndex < 0 || playerIndex >= Players.Count) return null;
+        var deck = Players[playerIndex].Deck;
+        if (deck == null || deck.Count == 0) return null;
+        // Queue<T> doesn't expose Peek in older frameworks? but in .NET it does
+        try
+        {
+            return deck.Peek();
+        }
+        catch
+        {
+            // fallback: enumerate first
+            return deck.FirstOrDefault();
+        }
     }
 
     private ElementReference startButton;
