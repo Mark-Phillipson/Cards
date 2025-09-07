@@ -11,7 +11,7 @@
 <div class="mb-3">
     <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">Start Game</button>
     <button class="btn btn-secondary me-2" @onclick="ResetGame">Reset Game</button>
-    <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)">Play Card</button>
+    <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)" @ref="playButton">Play Card</button>
     @statusMessage
 </div>
 
@@ -140,7 +140,9 @@
 
     private bool IsHumanTurn => Players.Count > 0 && CurrentPlayerIndex == 0;
 
-    private void StartGame()
+    private ElementReference playButton;
+
+    private async Task StartGame()
     {
         ResetGame();
         DeckService.ResetDeck();
@@ -157,6 +159,18 @@
     PenaltyActive = false;
     PenaltyPlayerIndex = null;
         StateHasChanged();
+
+        // After UI has rendered, move focus to the Play Card button so Enter can be used
+        try
+        {
+            // yield to allow render
+            await Task.Yield();
+            await JS.InvokeVoidAsync("focusElement", playButton);
+        }
+        catch
+        {
+            // best-effort, ignore JS errors
+        }
     }
 
     private void ResetGame()
@@ -369,6 +383,7 @@
     };
 
     private ElementReference startButton;
+    private bool prevPlayEnabled = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -384,5 +399,21 @@
                 // ignore JS errors — focusing is best-effort
             }
         }
+
+        // Determine whether Play Card is enabled now
+        var playEnabled = IsHumanTurn && !GameOver && CanPlay;
+        if (playEnabled && !prevPlayEnabled)
+        {
+            // play button has just become available — move focus so Enter will trigger it
+            try
+            {
+                await JS.InvokeVoidAsync("focusElement", playButton);
+            }
+            catch
+            {
+                // ignore JS errors
+            }
+        }
+        prevPlayEnabled = playEnabled;
     }
 }

@@ -1,2 +1,4 @@
-When the page loads move the keyboard focus to the start game button so that pressing enter starts the game
-Note: Implemented focusing the Start Game button on first render using JS interop in `CardGame/Pages/Game.razor` and a small `focusElement` helper in `wwwroot/index.html`.
+Whenever the play card becomes available always move the keyboard focus to the button so that a user can just hit enter to play the card. 
+
+Note: Implemented focus transfer to the Play Card button whenever it becomes enabled by tracking the enabled state and focusing via JS interop (`focusElement`) in `CardGame/Pages/Game.razor`.
+
