@@ -1,4 +1,4 @@
-﻿@page "/game"
+﻿@page "/stripjacknaked"
 @using System.Linq
 @using System.Threading.Tasks
 @using CardGame.Models
@@ -11,25 +11,15 @@
     <button class="btn btn-primary me-2" @onclick="StartGame">Start Game</button>
     <button class="btn btn-secondary me-2" @onclick="ResetGame">Reset Game</button>
     <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)">Play Card</button>
-    <!-- compact, left-aligned play status (shorter height to reduce visual weight) -->
-    <div style="display:block; text-align:left; margin-top:6px; height:18px; line-height:18px; font-size:0.9rem; color:#333;">
-        @statusMessage
-    </div>
+    @statusMessage
 </div>
 
 <div class="row">
-    <!-- removed 'Your last card' label and moved the card into Player 1 column for vertical alignment -->
-    <div class="col-md-2 text-center">
-        <div style="width:90px; height:128px; margin:0 auto;"></div>
-    </div>
 
     <div class="col-md-4" style="@(CurrentPlayerIndex==0 ? "background:#f8f9fa;border-radius:6px;" : "")">
         @if (Players.Count > 0)
         {
-            <h5>@Players[0].Name</h5>
-            <div style="text-align:left; height:16px; line-height:16px; font-size:0.85rem; color:#333;">
-                @(CurrentPlayerIndex==0 ? "⬅️ Your turn" : "")
-            </div>
+            <h5>@Players[0].Name @(CurrentPlayerIndex==0 ? "⬅️ Your turn" : "")</h5>
         }
         else
         {
@@ -87,10 +77,7 @@
     <div class="col-md-4 text-end" style="@(CurrentPlayerIndex==1 ? "background:#f8f9fa;border-radius:6px;" : "")">
         @if (Players.Count > 1)
         {
-            <h5>@Players[1].Name</h5>
-            <div style="text-align:left; height:16px; line-height:16px; font-size:0.85rem; color:#333;">
-                @(CurrentPlayerIndex==1 ? "⬅️ Their turn" : "")
-            </div>
+            <h5>@Players[1].Name @(CurrentPlayerIndex==1 ? "⬅️ Their turn" : "") </h5>
         }
         else
         {
