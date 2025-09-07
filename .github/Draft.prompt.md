@@ -1,3 +1,3 @@
- when a house card is played can the number of cards that the opposing player has to lay down be shown in the section where it says your turn or their turn and make this number more prominent. it should automatically rundown as each card is played
+That animation just seems to make the card big. Can we instead make it move the centre pile either left or right depending on who won?
 
-Note: Implemented prominent penalty counter shown as a red badge next to each player's name when they are the penalized player; the `statusMessage` also displays the required count and it updates as cards are played.
+Note: Updated the pile-to-hand animation so the center pile now moves left or right (translateX) toward the winning player instead of only resizing.

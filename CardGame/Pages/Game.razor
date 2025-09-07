@@ -8,6 +8,45 @@
 
 <h3>Strip Jack Naked</h3>
 
+<style>
+    /* Animated CPU card moving to center */
+    .animated-card {
+        position: absolute;
+        top: 40px;
+        width: 120px;
+        left: 85%;
+        transition: left 600ms ease, width 600ms ease, transform 600ms ease, opacity 300ms ease;
+        z-index: 60;
+        transform: rotate(0deg);
+        box-shadow:0 6px 12px rgba(0,0,0,0.25);
+    }
+    .animated-card.to-center {
+        left: 50%;
+        transform: translateX(-50%) rotate(4deg);
+        width: 160px;
+    }
+    /* Player animated card starts from left and moves to center */
+    .animated-card.player { left: 15%; }
+    .animated-card.player.to-center { left: 50%; transform: translateX(-50%) rotate(-4deg); width:160px; }
+    /* Penalty color classes: 1..4 */
+    .penalty-1 { background:#dc3545; color:#fff; } /* red */
+    .penalty-2 { background:#fd7e14; color:#fff; } /* orange */
+    .penalty-3 { background:#ffc107; color:#000; } /* yellow */
+    .penalty-4 { background:#198754; color:#fff; } /* green */
+    /* Pile-to-hand animation: centered -> move left or right */
+    .pile-anim {
+        position: absolute;
+        left: 50%;
+        top: 40px;
+        transform: translateX(-50%) rotate(4deg) scale(1);
+        width:160px;
+        transition: transform 700ms cubic-bezier(.2,.9,.2,1), opacity 300ms ease;
+        z-index: 80;
+    }
+    .pile-anim.to-left { transform: translateX(-250%) rotate(-8deg) scale(0.9); }
+    .pile-anim.to-right { transform: translateX(150%) rotate(8deg) scale(0.9); }
+</style>
+
 <div class="mb-3">
     <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">Start Game</button>
     <button class="btn btn-secondary me-2" @onclick="ResetGame">Reset Game</button>
@@ -26,7 +65,7 @@
                 @(CurrentPlayerIndex==0 ? " ⬅️ Your turn" : "")
                 @if (isPenalized0)
                 {
-                    <span class="badge bg-danger ms-2" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
+                    <span class="badge ms-2 @PenaltyBadgeClass(PenaltyCount)" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
                 }
             </h5>
         }
@@ -80,6 +119,24 @@
         {
             <img src="/cards/Cards-Blank.svg" alt="empty" style="width:160px;" />
         }
+        @* Animated CPU card overlays *@
+        @if (IsAnimatingCpuCard && !string.IsNullOrEmpty(AnimCpuCardUrl))
+        {
+            <img src="@AnimCpuCardUrl" class="animated-card @(AnimCpuToCenter ? "to-center" : "")" style="opacity:1;" />
+        }
+        @if (IsAnimatingPlayerCard && !string.IsNullOrEmpty(AnimPlayerCardUrl))
+        {
+            <img src="@AnimPlayerCardUrl" class="animated-card player @(AnimPlayerToCenter ? "to-center" : "")" style="opacity:1;" />
+        }
+        @if (IsAnimatingTakePile && AnimPileCards != null && AnimPileCards.Length > 0)
+        {
+            var top = AnimPileCards.Length > 0 ? AnimPileCards[0] : null;
+            if (top != null)
+            {
+                var cls = "pile-anim" + (TakePileTargetIndex == 0 ? " to-left" : (TakePileTargetIndex == 1 ? " to-right" : ""));
+                <img src="@top.ImageUrl" class="@cls" style="opacity:1;" />
+            }
+        }
         </div>
     </div>
 
@@ -92,7 +149,7 @@
                 @(CurrentPlayerIndex==1 ? " ⬅️ Their turn" : "")
                 @if (isPenalized1)
                 {
-                    <span class="badge bg-danger ms-2" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
+                    <span class="badge ms-2 @PenaltyBadgeClass(PenaltyCount)" style="font-size:1.15rem; padding:0.45rem 0.6rem;">@PenaltyCount</span>
                 }
             </h5>
         }
@@ -151,6 +208,18 @@
     private string winnerMessage = string.Empty;
     private Card? LastHumanCard = null;
     private Card? LastCpuCard = null;
+    // animation state for CPU play
+    private bool IsAnimatingCpuCard = false;
+    private bool AnimCpuToCenter = false;
+    private string? AnimCpuCardUrl = null;
+    // animation state for player play
+    private bool IsAnimatingPlayerCard = false;
+    private bool AnimPlayerToCenter = false;
+    private string? AnimPlayerCardUrl = null;
+        // take-pile animation state
+        private bool IsAnimatingTakePile = false;
+        private int? TakePileTargetIndex = null; // 0 or 1
+        private Card[]? AnimPileCards = null;
 
     private int TotalCardsCount => (Players?.Sum(p => p.Deck?.Count ?? 0) ?? 0) + (Pile?.Count ?? 0);
 
@@ -277,17 +346,58 @@
             return;
         }
 
-        // record last human card for display
-        // record last human/cpu card for display
-        if (playerIndex == 0)
+        // If a player is playing, animate their card moving to center before revealing it in the pile
+        if (playerIndex == 1 || playerIndex == 0)
         {
-            LastHumanCard = card;
-        }
-        else if (playerIndex == 1)
-        {
-            LastCpuCard = card;
+            try
+            {
+                if (playerIndex == 1)
+                {
+                    IsAnimatingCpuCard = true;
+                    AnimCpuToCenter = false;
+                    AnimCpuCardUrl = card.ImageUrl;
+                }
+                else
+                {
+                    IsAnimatingPlayerCard = true;
+                    AnimPlayerToCenter = false;
+                    AnimPlayerCardUrl = card.ImageUrl;
+                }
+                StateHasChanged();
+
+                // allow the animated element to render
+                await Task.Delay(50);
+
+                // start animation to center
+                if (playerIndex == 1)
+                    AnimCpuToCenter = true;
+                else
+                    AnimPlayerToCenter = true;
+                StateHasChanged();
+
+                // wait for animation to complete (match CSS transition)
+                await Task.Delay(650);
+            }
+            finally
+            {
+                // clear animation state after the visual transfer and keep last card for UI
+                if (playerIndex == 1)
+                {
+                    IsAnimatingCpuCard = false;
+                    AnimCpuToCenter = false;
+                    LastCpuCard = card;
+                }
+                else
+                {
+                    IsAnimatingPlayerCard = false;
+                    AnimPlayerToCenter = false;
+                    LastHumanCard = card;
+                }
+                StateHasChanged();
+            }
         }
 
+        // finally, place the card on the pile
         Pile.Push(card);
         var rank = card.Rank ?? "?";
         var suit = card.Suit ?? "?";
@@ -331,10 +441,10 @@
                 PenaltyPlayerIndex = null;
                 if (LastCourtPlayer != null)
                 {
-                    // ensure the UI shows the last card that was played before we remove/transfer the pile
+                    // ensure the UI shows the last card that was played before we animate the pile transfer
                     StateHasChanged();
-                    await Task.Delay(1000);
-                    TakePile(LastCourtPlayer);
+                    await Task.Delay(300);
+                    await TakePileAsync(LastCourtPlayer);
                     var idx = Players.IndexOf(LastCourtPlayer);
                     if (idx >= 0) CurrentPlayerIndex = idx;
                     statusMessage = $"{(LastCourtPlayer?.Name ?? "Player")} wins the pile and will play next.";
@@ -359,6 +469,7 @@
 
     private void TakePile(Player taker)
     {
+        // synchronous transfer used as a fallback
         if (taker == null) return;
         if (taker.Deck == null) taker.Deck = new System.Collections.Generic.Queue<Card>();
         // take all cards from pile (bottom first)
@@ -370,6 +481,42 @@
         Pile.Clear();
         PenaltyCount = 0;
         LastCourtPlayer = null;
+    }
+
+    private async Task TakePileAsync(Player taker)
+    {
+        if (taker == null) return;
+        // prepare animation state: snapshot pile
+        var cards = Pile.ToArray();
+        AnimPileCards = cards;
+        TakePileTargetIndex = Players.IndexOf(taker);
+        IsAnimatingTakePile = true;
+        StateHasChanged();
+
+        // give the animated element a moment to render, then move it to the player's side
+        await Task.Delay(50);
+        // choose direction based on target index (0 = left, 1 = right)
+        var toLeft = TakePileTargetIndex == 0;
+        // set a short flag on the UI via CSS class by keeping TakePileTargetIndex and IsAnimatingTakePile
+        StateHasChanged();
+
+        // animate
+        await Task.Delay(750);
+
+        // after animation completes, transfer cards into taker's deck
+        if (taker.Deck == null) taker.Deck = new System.Collections.Generic.Queue<Card>();
+        Array.Reverse(cards); // bottom -> top
+        foreach (var c in cards)
+            taker.Deck.Enqueue(c);
+
+        // clear pile and reset animation state
+        Pile.Clear();
+        PenaltyCount = 0;
+        LastCourtPlayer = null;
+        IsAnimatingTakePile = false;
+        TakePileTargetIndex = null;
+        AnimPileCards = null;
+        StateHasChanged();
     }
 
     private void EndGameOtherPlayer(Player emptyPlayer)
@@ -402,6 +549,18 @@
         "A" => 4,
         _ => 0
     };
+
+    private string PenaltyBadgeClass(int count)
+    {
+        return count switch
+        {
+            1 => "penalty-1",
+            2 => "penalty-2",
+            3 => "penalty-3",
+            4 => "penalty-4",
+            _ => "bg-secondary"
+        };
+    }
 
     private ElementReference startButton;
     private bool prevPlayEnabled = false;
