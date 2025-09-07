@@ -1,1 +1,1 @@
-Can we do away with the reset button and change the start game button to start new game instead I don't think we need to change any functionality it's just the button caption that needs to change and the removing of the reset game and any code it has behind it as it is superfluous
+Can we have it when we play a card and run the animation just before it runs we need to hide the player one top card if it is play one that is playing it player two is fine as it's just the back anyway

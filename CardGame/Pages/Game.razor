@@ -250,14 +250,15 @@
         top: 40px;
         height: 120px;
         left: 15%;
-        transition: left 600ms ease, height 600ms ease, transform 600ms ease, opacity 300ms ease;
-        z-index: 60;
-        transform: rotate(0deg);
+    transition: left 600ms ease, height 600ms ease, transform 600ms ease, opacity 300ms ease;
+    z-index: 60;
+    transform: rotate(0deg);
         box-shadow: 0 8px 16px rgba(139, 69, 19, 0.4);
         border: 2px solid #DAA520;
         border-radius: 8px;
         background-color: #FFFEF7;
         padding: 4px;
+    opacity: 0; /* start hidden; become visible via .visible */
     }
     
     .animated-card.to-center {
@@ -298,6 +299,21 @@
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
         background-color: #FFFEF7;
         padding: 4px;
+    }
+
+    /* Fade-controlled preview for the player's top card so it can smoothly disappear
+       just before the animated overlay runs. Keeps layout because opacity only is changed. */
+    .top-preview {
+        height: 160px;
+        transition: opacity 220ms ease;
+    }
+    .top-preview.fading {
+        opacity: 0;
+    }
+
+    /* Make animated-card fade in/out smoothly when toggled */
+    .animated-card.visible {
+        opacity: 1;
     }
     
     .pile-anim.to-left { 
@@ -405,9 +421,13 @@
                     var next = GetNextCardForPlayer(0);
                     if (next != null)
                     {
+                        // If the player's card is currently being animated for this same card,
+                        // start fading the preview slightly earlier so the animation appears seamless.
+                        var fadePreview = IsAnimatingPlayerCard && !string.IsNullOrEmpty(AnimPlayerCardUrl) && AnimPlayerCardUrl == next.ImageUrl;
+                        var previewClass = "top-preview" + (fadePreview ? " fading" : "");
                         /* Show the human's top card face-up (right-aligned) so they can see it before playing */
                         <div style="display:flex; justify-content:flex-end;">
-                            <img src="@next.ImageUrl" alt="@next.Rank of @next.Suit" style="height:160px; box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
+                            <img src="@next.ImageUrl" class="@previewClass" alt="@next.Rank of @next.Suit" style="box-shadow:0 4px 6px rgba(0,0,0,0.15);" />
                         </div>
                     }
                     else
@@ -455,11 +475,13 @@
         @* Animated CPU card overlays *@
         @if (IsAnimatingCpuCard && !string.IsNullOrEmpty(AnimCpuCardUrl))
         {
-            <img src="@AnimCpuCardUrl" class="animated-card player @(AnimCpuToCenter ? "to-center" : "")" style="opacity:1;" />
+            var cpuClass = "animated-card player " + (AnimCpuToCenter ? "to-center" : "") + " visible";
+            <img src="@AnimCpuCardUrl" class="@cpuClass" />
         }
         @if (IsAnimatingPlayerCard && !string.IsNullOrEmpty(AnimPlayerCardUrl))
         {
-            <img src="@AnimPlayerCardUrl" class="animated-card @(AnimPlayerToCenter ? "to-center" : "")" style="opacity:1;" />
+            var playerAnimClass = "animated-card " + (AnimPlayerToCenter ? "to-center" : "") + " visible";
+            <img src="@AnimPlayerCardUrl" class="@playerAnimClass" />
         }
         @if (IsAnimatingTakePile && AnimPileCards != null && AnimPileCards.Length > 0)
         {
