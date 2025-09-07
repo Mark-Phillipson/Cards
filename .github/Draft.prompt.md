@@ -1,1 +1,1 @@
-Can we create a new Blazor component to store the rules of the game and create a button on the main game that when clicked we'll show the rules in a modal window?
+It appears the first time we play the animation starts at the correct location however after the player 2 has had a go and then player one has a go the animation does not play correctly.

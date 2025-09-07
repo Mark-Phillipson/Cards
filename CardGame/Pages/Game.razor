@@ -250,29 +250,38 @@
         position: absolute;
         top: 40px;
         height: 120px;
-        left: 15%;
-    transition: left 600ms ease, height 600ms ease, transform 600ms ease, opacity 300ms ease;
-    z-index: 60;
-    transform: rotate(0deg);
+        left: 50%;
+        transition: transform 600ms ease, height 600ms ease, opacity 300ms ease;
+        z-index: 60;
+        /* start centered but translated so children can shift off-screen via translateX */
+        transform: translateX(-50%) rotate(0deg);
         box-shadow: 0 8px 16px rgba(139, 69, 19, 0.4);
         border: 2px solid #DAA520;
         border-radius: 8px;
         background-color: #FFFEF7;
         padding: 4px;
-    opacity: 0; /* start hidden; become visible via .visible */
+        opacity: 0; /* start hidden; become visible via .visible */
     }
-    
+
+    /* When moving to center, normalize to translateX(-50%) and apply a rotation */
     .animated-card.to-center {
-        left: 50%;
         transform: translateX(-50%) rotate(-20deg);
         height: 160px;
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
     }
-    
-    .animated-card.player { left: 85%; }
-    .animated-card.player.to-center { 
-        left: 50%; 
-        transform: translateX(-50%) rotate(20deg); 
+
+    /* CPU starts to the right of center and moves to center when .to-center added */
+    .animated-card.player { transform: translateX(350%) rotate(0deg); }
+    .animated-card.player.to-center {
+        transform: translateX(-50%) rotate(20deg);
+        height: 160px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+
+    /* Human (player 0) starts to the left of center and moves to center when .to-center added */
+    .animated-card.human { transform: translateX(-350%) rotate(0deg); }
+    .animated-card.human.to-center {
+        transform: translateX(-50%) rotate(-20deg);
         height: 160px;
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
     }
@@ -482,7 +491,8 @@
         }
         @if (IsAnimatingPlayerCard && !string.IsNullOrEmpty(AnimPlayerCardUrl))
         {
-            var playerAnimClass = "animated-card " + (AnimPlayerToCenter ? "to-center" : "") + " visible";
+            // Use 'human' class so player's animation starts from the left side
+            var playerAnimClass = "animated-card human " + (AnimPlayerToCenter ? "to-center" : "") + " visible";
             <img src="@AnimPlayerCardUrl" class="@playerAnimClass" />
         }
         @if (IsAnimatingTakePile && AnimPileCards != null && AnimPileCards.Length > 0)
@@ -844,7 +854,7 @@
                     if (idx >= 0) CurrentPlayerIndex = idx;
 
                     if (taker != null)
-                        await TakePileAsync(taker);
+                        await TakePileAsync(taker, animate: false);
 
                     // Use single-digit labels: "Player 1" / "Player 2" when possible
                     string winnerLabel;
@@ -887,9 +897,18 @@
         LastCourtPlayer = null;
     }
 
-    private async Task TakePileAsync(Player taker)
+    private async Task TakePileAsync(Player taker, bool animate = true)
     {
         if (taker == null) return;
+
+        // If animation is disabled, perform the synchronous transfer and return.
+        if (!animate)
+        {
+            TakePile(taker);
+            StateHasChanged();
+            return;
+        }
+
         // prepare animation state: snapshot pile
         var cards = Pile.ToArray();
         AnimPileCards = cards;
