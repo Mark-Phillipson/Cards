@@ -7,6 +7,7 @@
 @inject DeckService DeckService
 @inject IJSRuntime JS
 @inject CardGame.Services.SoundService SoundService
+@inject NavigationManager Navigation
 
 <div class="western-header">
     <h1 class="western-title">🤠 STRIP JACK NAKED 🤠</h1>
@@ -402,6 +403,7 @@
 <div class="mb-3">
     <button class="btn btn-primary me-2" @onclick="StartGame" @ref="startButton">🎲 Start New Game</button>
     <button class="btn btn-success" @onclick="HumanPlay" disabled="@(!IsHumanTurn || GameOver || !CanPlay)" @ref="playButton">🂡 Play Card</button>
+    <button class="btn btn-secondary ms-2" @onclick="GoHome">🏠 Home</button>
     <button class="btn btn-secondary ms-2" @onclick="() => rulesVisible = true">📜 Rules</button>
     <span class="status-message">@statusMessage</span>
 </div>
@@ -786,7 +788,7 @@
         try
         {
             // remove the top card from the player's deck — this should be the same card we peeked
-            if (player.Deck != null && player.Deck.Count > 0)
+                if (player.Deck != null && player.Deck.Count > 0)
             {
                 var dequeued = player.Deck.Dequeue();
                 // push the dequeued card into the pile
@@ -797,6 +799,15 @@
                 if (playerIndex == 0) LastHumanCard = dequeued;
                 else if (playerIndex == 1) LastCpuCard = dequeued;
                 card = dequeued; // ensure subsequent logic refers to the dequeued card
+
+                // Immediately check for win conditions. This ensures the game ends as soon as
+                // one player has no cards left (covers court/penalty branches that return early).
+                CheckForWin();
+                if (GameOver)
+                {
+                    StateHasChanged();
+                    return;
+                }
             }
         }
         catch
@@ -1021,6 +1032,12 @@
 
     private ElementReference startButton;
     private bool prevPlayEnabled = false;
+
+    private void GoHome()
+    {
+        // Navigate back to the application's root/home page
+        Navigation.NavigateTo("/");
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

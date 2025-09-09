@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "name": "cardgame-blazor",
+  "builds": [
+    {
+      "src": "CardGame/CardGame.csproj",
+      "use": "@vercel/dotnet/runtime"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/CardGame/publish/wwwroot/$1"
+    },
+    {
+      "src": "/.*",
+      "dest": "/CardGame/publish/wwwroot/index.html"
+    }
+  ]
+}

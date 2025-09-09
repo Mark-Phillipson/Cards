@@ -1,1 +1,1 @@
- can we plan how to add sound to the application for example when a player wins a round? and another one when the player wins the game and a completely different one when a player loses the game
+Remove all references to configuring how to published to vercel and document in readme how to published to azure static webapps
