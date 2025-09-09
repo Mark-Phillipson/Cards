@@ -3,7 +3,7 @@ CardGame — Deploy to Azure Static Web Apps
 
 This repository contains a Blazor WebAssembly card game (Strip Jack Naked) in the `CardGame/` folder.
 
-This README replaces previous Vercel-focused instructions and documents how to publish the app to Azure Static Web Apps (recommended for Blazor WASM).
+This README documents how to publish the app to Azure Static Web Apps (recommended for Blazor WASM).
 
 Prerequisites
 -------------
@@ -69,7 +69,7 @@ Next steps and optional improvements
 - Add a GitHub Actions step to run `dotnet publish` with a deterministic output path and set `app_artifact_location` to that path.
 - Add instructions for custom domains, HTTPS, and environment variables if you need server-side configuration.
 
-Requirements coverage
+
 ---------------------
 - Remove references to Vercel: DONE (deleted `README-vercel.md` and `vercel.json`).
 - Document how to publish to Azure Static Web Apps: DONE (this `README.md`).
