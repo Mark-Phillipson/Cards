@@ -1,1 +1,0 @@
-Remove all references to configuring how to published to vercel and document in readme how to published to azure static webapps
