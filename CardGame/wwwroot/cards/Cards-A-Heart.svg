@@ -34,6 +34,10 @@
        inkscape:vp_x="0 : 526.18109 : 1"
        sodipodi:type="inkscape:persp3d" />
   </defs>
+   <style>
+      .pulse { transform-box: fill-box; transform-origin: 50% 50%; animation: clubPulse 2s ease-in-out infinite; }
+      @keyframes clubPulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+   </style>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -95,6 +99,7 @@
              id="text2702"
              y="298.36212"
              x="67.050735"
+             class="pulse"
              style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
              xml:space="preserve"><tspan
                y="298.36212"
@@ -117,7 +122,8 @@
          style="font-size:500px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
          x="373.46939"
          y="685.77356"
-         id="text2783"><tspan
+         id="text2783"
+         class="pulse"><tspan
            sodipodi:role="line"
            id="tspan2785"
            x="373.46939"

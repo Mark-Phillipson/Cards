@@ -56,6 +56,10 @@
        inkscape:persp3d-origin="373.67349 : 348.76188 : 1"
        id="perspective22" />
   </defs>
+   <style>
+      .pulse { transform-box: fill-box; transform-origin: 50% 50%; animation: clubPulse 2s ease-in-out infinite; }
+      @keyframes clubPulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+   </style>
   <g
      transform="translate(2.2448993,-0.6479052)"
      id="layer1">
@@ -81,6 +85,7 @@
              y="299.04404"
              id="text2702"
              xml:space="preserve"
+             class="pulse"
              style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"><tspan
                x="65.547516"
                y="299.04404"
@@ -116,6 +121,7 @@
            y="685.77356"
            id="text2783"
            xml:space="preserve"
+           class="pulse"
            style="font-size:500px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"><tspan
              x="373.46939"
              y="685.77356"
