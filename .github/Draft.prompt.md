@@ -1,1 +1,1 @@
-Currently when I click on a card that has been highlighted as valid for discarding it comes up with a message you cannot discard and nothing happens whereas it should be discarded
+Can we havekeyboard shortcuts for the game for example I'd like to press the letter N  to start a new game and the letter D  to deal the next four cards from the stock to the tableau. Can you implement this feature?

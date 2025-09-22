@@ -46,10 +46,10 @@ public partial class AcesUp : ComponentBase
 
     public void DealNext()
     {
-        if (!CanDeal) return;
+        if (Stock.Count == 0 || Tableau == null || Tableau.Count < 1) return;
         for (int i = 0; i < 4; i++)
         {
-            if (Stock.Count > 0 && Tableau != null && i < Tableau.Count && Tableau[i] != null)
+            if (Stock.Count > 0 && i < Tableau.Count && Tableau[i] != null)
             {
                 var card = Stock.Dequeue();
                 card.IsFaceUp = true;
@@ -79,19 +79,12 @@ public partial class AcesUp : ComponentBase
     {
         if (Tableau == null || pileIndex < 0 || pileIndex >= Tableau.Count)
         {
-            Console.WriteLine($"DiscardCard called with invalid pileIndex: {pileIndex}");
             ShowToastMessage($"Internal error: invalid pile index {pileIndex}");
             return;
         }
         var discardableList = GetDiscardableCards();
         var card = (Tableau[pileIndex] != null && Tableau[pileIndex].Count > 0) ? Tableau[pileIndex].Peek() : null;
-        foreach (var x in discardableList)
-        {
-            Console.WriteLine($"Comparing: pileIndex {x.pileIndex} == {pileIndex}, Rank {x.card.Rank} == {card?.Rank}, Suit {x.card.Suit} == {card?.Suit}, Value {x.card.Value} == {card?.Value}");
-        }
         var discardable = discardableList.Any(x => x.pileIndex == pileIndex && x.card.Rank == card?.Rank && x.card.Suit == card?.Suit && x.card.Value == card?.Value);
-        Console.WriteLine($"Discardable: {discardable}");
-        Console.WriteLine($"Clicked: {pileIndex} ({card?.Rank} of {card?.Suit}), Discardable: [{string.Join(", ", discardableList)}]");
         if (discardable)
         {
             Tableau[pileIndex].Pop();
@@ -103,7 +96,7 @@ public partial class AcesUp : ComponentBase
         {
             var discardableCards = discardableList.Select(x => $"{x.pileIndex}:{x.card.Rank} of {x.card.Suit}");
             var debug = $"Clicked: {pileIndex} ({card?.Rank} of {card?.Suit}), Discardable: [{string.Join(", ", discardableCards)}]";
-            ShowToastMessage($"This card cannot be discarded. {debug}");
+            ShowToastMessage($"This card cannot be discarded.");
         }
     }
 
@@ -139,6 +132,23 @@ public partial class AcesUp : ComponentBase
         Tableau[emptyIndex].Push(card);
         CheckGameEnd();
         StateHasChanged();
+    }
+
+    public void OnCardClick(int pileIndex)
+    {
+        var discardableList = GetDiscardableCards();
+        var card = (Tableau != null && pileIndex >= 0 && pileIndex < Tableau.Count && Tableau[pileIndex] != null && Tableau[pileIndex].Count > 0) ? Tableau[pileIndex].Peek() : null;
+        var discardable = discardableList.Any(x => x.pileIndex == pileIndex && x.card.Rank == card?.Rank && x.card.Suit == card?.Suit && x.card.Value == card?.Value);
+        var canMoveToEmpty = Tableau != null && Tableau[pileIndex] != null && Tableau[pileIndex].Count > 0 && Tableau.Any(p => p != null && p.Count == 0) && !discardable;
+        if (discardable)
+        {
+            DiscardCard(pileIndex);
+        }
+        else if (canMoveToEmpty)
+        {
+            TryMoveToEmpty(pileIndex);
+        }
+        // else do nothing
     }
 
     private void CheckGameEnd()
