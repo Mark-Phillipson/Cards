@@ -8,21 +8,14 @@
     private ElementReference mainDivRef;
     private DotNetObjectReference<AcesUp>? dotNetRef;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
-        }
-    }
+    // ...existing code...
 
     [JSInvokable]
     public void OnKeyShortcut(string key)
     {
         if (key == "n" || key == "N")
         {
-            NewGame();
+            ShowNewGameConfirmModal();
         }
         else if (key == "d" || key == "D")
         {
@@ -41,22 +34,92 @@
 }
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 12px;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
-            <button class="acesup-btn" style="width: 120px; min-width: 120px; max-width: 120px;" @onclick="NewGame">New</button>
-            <button class="acesup-btn" style="margin-top: 8px; width: 120px; min-width: 120px; max-width: 120px;" @onclick="GoHome">Home</button>
-            <button class="acesup-btn" style="margin-top: 8px; width: 120px; min-width: 120px; max-width: 120px;" @onclick="ShowRulesModal">Rules</button>
+            <button class="acesup-btn" accesskey="n" style="width: 120px; min-width: 120px; max-width: 120px;" @onclick="ShowNewGameConfirmModal">New <span style="font-size:0.85em;opacity:0.7;">(Alt+N)</span></button>
+            <button class="acesup-btn" accesskey="h" style="margin-top: 8px; width: 120px; min-width: 120px; max-width: 120px;" @onclick="GoHome">Home <span style="font-size:0.85em;opacity:0.7;">(Alt+H)</span></button>
+            <button class="acesup-btn" accesskey="r" style="margin-top: 8px; width: 120px; min-width: 120px; max-width: 120px;" @onclick="ShowRulesModal">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
         </div>
 @if (showRulesModal)
 {
     <AcesUpRulesModal OnClose="HideRulesModal" />
 }
+
+@if (showNewGameConfirmModal)
+{
+    <div class="modal-overlay">
+        <div class="modal-dialog">
+            <div style="margin-bottom: 18px; font-size: 1.1em;">Start a new game? Your current progress will be lost.</div>
+            <div style="display: flex; gap: 16px; justify-content: flex-end;">
+                <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @ref="noBtnRef" @onclick="HideNewGameConfirmModal">No</button>
+                <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @onclick="ConfirmNewGame">Yes</button>
+            </div>
+        </div>
+    </div>
+}
 @code {
     private bool showRulesModal = false;
     private void ShowRulesModal() => showRulesModal = true;
     private void HideRulesModal() => showRulesModal = false;
+
+    private bool showNewGameConfirmModal = false;
+    private ElementReference noBtnRef;
+    private bool shouldFocusNoBtn = false;
+
+    private void ShowNewGameConfirmModal()
+    {
+        showNewGameConfirmModal = true;
+        shouldFocusNoBtn = true;
+        StateHasChanged();
+    }
+    private void HideNewGameConfirmModal()
+    {
+        showNewGameConfirmModal = false;
+    }
+    private void ConfirmNewGame()
+    {
+        showNewGameConfirmModal = false;
+        NewGame();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
+        }
+        if (shouldFocusNoBtn && showNewGameConfirmModal)
+        {
+            shouldFocusNoBtn = false;
+            await JS.InvokeVoidAsync("AcesUpFocus.setFocus", noBtnRef);
+        }
+    }
+
     [Inject] NavigationManager? Nav { get; set; }
     void GoHome() => Nav?.NavigateTo("/");
     // ...existing code...
 }
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.25);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-dialog {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            padding: 32px 32px 24px 32px;
+            min-width: 320px;
+            max-width: 90vw;
+        }
+    </style>
         <div style="flex: 1; text-align: center; font-size: 1.3em;">
             <span>Aces Up</span>
         </div>
@@ -140,7 +203,12 @@
         .acesup-btn:hover, .acesup-btn:focus {
             background: linear-gradient(90deg, #1565c0 0%, #1e88e5 100%);
             transform: translateY(-2px) scale(1.04);
-            outline: none;
+        }
+        .acesup-btn:focus {
+            outline: 3px solid #ff9800;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px #ffe0b2;
+            z-index: 10;
         }
         .tableau {
             display: flex;
