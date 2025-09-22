@@ -1,1 +1,1 @@
-Can we havekeyboard shortcuts for the game for example I'd like to press the letter N  to start a new game and the letter D  to deal the next four cards from the stock to the tableau. Can you implement this feature?
+ the problem with the design is there's no physical space for the nature of the game and that we have to see all the cards underneath that have been laid  so we can plan the next moves
