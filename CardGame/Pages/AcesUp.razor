@@ -1,12 +1,54 @@
+@inject IJSRuntime JS
 @page "/acesup"
 @using CardGame.Models
 @using CardGame.Services
+<PageTitle>Aces Up</PageTitle>
+<div style="display: flex; flex-direction: column; align-items: center;" @ref="mainDivRef">
+@code {
+    private ElementReference mainDivRef;
+    private DotNetObjectReference<AcesUp>? dotNetRef;
 
-<div style="display: flex; flex-direction: column; align-items: center;">
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public void OnKeyShortcut(string key)
+    {
+        if (key == "n" || key == "N")
+        {
+            NewGame();
+        }
+        else if (key == "d" || key == "D")
+        {
+            DealNext();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (dotNetRef != null)
+        {
+            JS.InvokeVoidAsync("AcesUpKeyboard.dispose");
+            dotNetRef.Dispose();
+        }
+    }
+}
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 12px;">
-        <div style="flex: 1;">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
             <button @onclick="NewGame">New Game</button>
+            <button style="margin-top: 8px;" @onclick="GoHome">Home</button>
         </div>
+@code {
+    [Inject] NavigationManager Nav { get; set; }
+    void GoHome() => Nav.NavigateTo("/");
+    // ...existing code...
+}
         <div style="flex: 1; text-align: center; font-size: 1.3em;">
             <span>Aces Up</span>
         </div>
@@ -24,14 +66,6 @@
         </div>
     </div>
 
-    <!-- DEBUG: Show discardable cards for diagnosis -->
-    <div style="margin-top: 24px; color: #c00; font-size: 1em;">
-        <b>Discardable:</b>
-        @foreach (var d in GetDiscardableCards())
-        {
-            <span style="margin-right: 12px;">[@d.pileIndex: @d.card.Rank of @d.card.Suit (@d.card.Value)]</span>
-        }
-    </div>
     <div style="margin-bottom: 8px; font-size: 1.1em; color: #333;">Discarded: @Discarded</div>
     <div style="margin-bottom: 8px;">@Message</div>
     <div class="tableau" style="display: flex; flex-direction: row; gap: 24px; justify-content: center; width: 100%; max-width: 700px;">
