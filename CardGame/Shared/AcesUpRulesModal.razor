@@ -1,0 +1,25 @@
+<div class="modal-background" @onclick="CloseModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;">
+    <div class="modal-content" @onclick:stopPropagation style="background:white;padding:2rem;border-radius:8px;max-width:500px;margin:5vh auto;box-shadow:0 2px 16px rgba(0,0,0,0.2);">
+        <h2>Aces Up Rules</h2>
+        <ul>
+            <li>Deal four cards face up in a row.</li>
+            <li>If two or more cards of the same suit are present, discard the lower-ranked card(s) of that suit.</li>
+            <li>Fill empty spaces with cards from the deck.</li>
+            <li>Repeat until the deck is exhausted and no more cards can be discarded.</li>
+            <li>The goal is to discard as many cards as possible, ideally leaving only the four aces.</li>
+        </ul>
+        <button class="btn btn-primary" @onclick="CloseModal">Close</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private void CloseModal()
+    {
+        if (OnClose.HasDelegate)
+        {
+            OnClose.InvokeAsync(null);
+        }
+    }
+}

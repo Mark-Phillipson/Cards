@@ -43,8 +43,16 @@
         <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
             <button class="acesup-btn" @onclick="NewGame">New Game</button>
             <button class="acesup-btn" style="margin-top: 8px;" @onclick="GoHome">Home</button>
+            <button class="acesup-btn" style="margin-top: 8px;" @onclick="ShowRulesModal">Rules</button>
         </div>
+@if (showRulesModal)
+{
+    <AcesUpRulesModal OnClose="HideRulesModal" />
+}
 @code {
+    private bool showRulesModal = false;
+    private void ShowRulesModal() => showRulesModal = true;
+    private void HideRulesModal() => showRulesModal = false;
     [Inject] NavigationManager? Nav { get; set; }
     void GoHome() => Nav?.NavigateTo("/");
     // ...existing code...
