@@ -183,3 +183,6 @@ This spec is to guide the implementation of *Aces Up* as a feature/game within y
 
 ---
 
+Please ensure that there is a code behind file called AcesUp.razor.cs
+
+ and also please try to use the services and assets from the strip jack naked game as much as possible.

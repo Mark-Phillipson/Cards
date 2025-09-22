@@ -1,0 +1,1 @@
+Currently when I click on a card that has been highlighted as valid for discarding it comes up with a message you cannot discard and nothing happens whereas it should be discarded

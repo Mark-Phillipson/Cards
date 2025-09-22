@@ -1,0 +1,99 @@
+@page "/acesup"
+@using CardGame.Models
+@using CardGame.Services
+
+<div class="acesup-container">
+    <h1>Aces Up</h1>
+    <button @onclick="NewGame">New Game</button>
+    <div>Discarded: @Discarded</div>
+    <div>@Message</div>
+
+    <div class="tableau">
+        @if (Tableau != null)
+        {
+            <text>Tableau.Count: @Tableau.Count</text>
+            int pileIndex = 0;
+            @for (int i = 0; i < Tableau.Count; i++)
+            {
+                var localIndex = pileIndex;
+                <text>i: @i, pileIndex: @pileIndex, localIndex: @localIndex, Tableau.Count: @Tableau.Count</text>
+                <div class="pile" @onclick="() => TryMoveToEmpty(localIndex)">
+                    @if (Tableau[i] != null)
+                    {
+                        @if (Tableau[i].Count > 0)
+                        {
+                            var top = Tableau[i].Peek();
+                            var discardable = GetDiscardableCards().Any(x => x.pileIndex == localIndex && x.card.Rank == top.Rank && x.card.Suit == top.Suit && x.card.Value == top.Value);
+                            <div style="position:relative;">
+                                <span style="position:absolute;top:-24px;left:0;background:yellow;color:black;font-size:14px;z-index:10;">i:@i, pileIndex:@pileIndex, localIndex:@localIndex</span>
+                                <img src="@top.ImageUrl" alt="@top.Rank of @top.Suit"
+                                     style="height:160px; border: 2px solid black; cursor: @(discardable ? "pointer" : "default"); box-shadow: @(discardable ? "0 0 8px 2px #ff9800" : "none");"
+                                     @onclick="(e => DiscardCard(localIndex))" @onclick:stopPropagation />
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="height:160px; width:110px; border:2px solid black; display:flex; align-items:center; justify-content:center; background:white;"></div>
+                        }
+                    }
+                </div>
+                pileIndex++;
+            }
+        }
+    </div>
+
+    <div class="stock" @onclick="DealNext" style="cursor: @(CanDeal ? "pointer" : "default")">
+        @if (Stock.Count > 0)
+        {
+            <img src="/cards/Cards-Reverse.svg" alt="stock" style="height:160px; border: 2px solid black;" />
+        }
+        else
+        {
+            <img src="/cards/Cards-Blank.svg" alt="no stock" style="height:160px; border: 2px solid black;" />
+        }
+    </div>
+
+    @if (ShowToast)
+    {
+        <div class="toast-message">@ToastMessage</div>
+    }
+</div>
+
+<style>
+    .acesup-container {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .tableau {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .pile {
+        cursor: pointer;
+    }
+
+    .stock {
+        margin: 20px auto;
+        width: fit-content;
+    }
+
+    .toast-message {
+        position: fixed;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: #fff;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        opacity: 0.95;
+        pointer-events: none;
+    }
+</style>
