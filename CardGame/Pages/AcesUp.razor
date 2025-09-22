@@ -41,9 +41,9 @@
 }
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 12px;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
-            <button class="acesup-btn" @onclick="NewGame">New</button>
-            <button class="acesup-btn" style="margin-top: 8px;" @onclick="GoHome">Home</button>
-            <button class="acesup-btn" style="margin-top: 8px;" @onclick="ShowRulesModal">Rules</button>
+            <button class="acesup-btn" style="width: 120px; min-width: 120px; max-width: 120px;" @onclick="NewGame">New</button>
+            <button class="acesup-btn" style="margin-top: 8px; width: 120px; min-width: 120px; max-width: 120px;" @onclick="GoHome">Home</button>
+            <button class="acesup-btn" style="margin-top: 8px; width: 120px; min-width: 120px; max-width: 120px;" @onclick="ShowRulesModal">Rules</button>
         </div>
 @if (showRulesModal)
 {
@@ -128,13 +128,14 @@
             color: #fff;
             border: none;
             border-radius: 6px;
-            padding: 10px 28px;
+            padding: 10px 0;
             font-size: 1.1em;
             font-weight: 600;
             box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
             margin-bottom: 4px;
+            text-align: center;
         }
         .acesup-btn:hover, .acesup-btn:focus {
             background: linear-gradient(90deg, #1565c0 0%, #1e88e5 100%);
