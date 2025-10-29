@@ -20,6 +20,17 @@ public partial class AcesUp : ComponentBase
     public bool ShowToast { get; set; } = false;
     private System.Timers.Timer? toastTimer;
 
+    // Undo state tracking
+    private enum MoveType { Discard, MoveToEmpty }
+    private class UndoState
+    {
+        public MoveType Type { get; set; }
+        public int FromPile { get; set; }
+        public int ToPile { get; set; }
+        public Card Card { get; set; } = null!;
+    }
+    private UndoState? lastMove = null;
+
     protected override void OnInitialized()
     {
         NewGame();
@@ -42,12 +53,15 @@ public partial class AcesUp : ComponentBase
         GameOver = false;
         Won = false;
         Message = "";
+        lastMove = null; // Clear undo state on new game
         StateHasChanged();
     }
 
     public void DealNext()
     {
         if (Stock.Count == 0 || Tableau == null || Tableau.Count < 1) return;
+        // Clear undo state when dealing (we don't undo deals)
+        lastMove = null;
         for (int i = 0; i < 4; i++)
         {
             if (Stock.Count > 0 && i < Tableau.Count && Tableau[i] != null)
@@ -88,8 +102,18 @@ public partial class AcesUp : ComponentBase
         var discardable = discardableList.Any(x => x.pileIndex == pileIndex && x.card.Rank == card?.Rank && x.card.Suit == card?.Suit && x.card.Value == card?.Value);
         if (discardable)
         {
-            Tableau[pileIndex].Pop();
+            var cardToDiscard = Tableau[pileIndex].Pop();
             Discarded++;
+            
+            // Record the move for undo
+            lastMove = new UndoState
+            {
+                Type = MoveType.Discard,
+                FromPile = pileIndex,
+                ToPile = -1, // Not applicable for discard
+                Card = cardToDiscard
+            };
+            
             CheckGameEnd();
             StateHasChanged();
         }
@@ -104,6 +128,51 @@ public partial class AcesUp : ComponentBase
     public bool IsCardDiscardable(int pileIndex)
     {
         return GetDiscardableCards().Any(x => x.pileIndex == pileIndex);
+    }
+
+    public bool CanUndo => lastMove != null;
+
+    public void Undo()
+    {
+        if (lastMove == null || Tableau == null) return;
+
+        try
+        {
+            if (lastMove.Type == MoveType.Discard)
+            {
+                // Restore the discarded card back to its original pile
+                Tableau[lastMove.FromPile].Push(lastMove.Card);
+                Discarded--;
+            }
+            else if (lastMove.Type == MoveType.MoveToEmpty)
+            {
+                // Move the card back from the empty pile to its original pile
+                if (Tableau[lastMove.ToPile].Count > 0 && Tableau[lastMove.ToPile].Peek() == lastMove.Card)
+                {
+                    Tableau[lastMove.ToPile].Pop();
+                    Tableau[lastMove.FromPile].Push(lastMove.Card);
+                }
+            }
+
+            // Clear the undo state after using it
+            lastMove = null;
+            
+            // Reset game over state since we've undone a move
+            if (GameOver)
+            {
+                GameOver = false;
+                Won = false;
+                Message = "";
+            }
+
+            StateHasChanged();
+        }
+        catch
+        {
+            // If something goes wrong, clear the undo state
+            lastMove = null;
+            ShowToastMessage("Unable to undo that move.");
+        }
     }
 
     private void ShowToastMessage(string message)
@@ -131,6 +200,16 @@ public partial class AcesUp : ComponentBase
         if (emptyIndex == -1) return;
         var card = Tableau[pileIndex].Pop();
         Tableau[emptyIndex].Push(card);
+        
+        // Record the move for undo
+        lastMove = new UndoState
+        {
+            Type = MoveType.MoveToEmpty,
+            FromPile = pileIndex,
+            ToPile = emptyIndex,
+            Card = card
+        };
+        
         CheckGameEnd();
         StateHasChanged();
     }
