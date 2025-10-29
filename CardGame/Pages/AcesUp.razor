@@ -58,11 +58,11 @@
 
 @if (showNewGameConfirmModal)
 {
-    <div class="modal-overlay">
+    <div class="modal-overlay" @onclick="HideNewGameConfirmModal">
         <div class="modal-dialog" @onclick:stopPropagation="true">
             <div style="margin-bottom: 18px; font-size: 1.1em;">Start a new game? Your current progress will be lost.</div>
             <div style="display: flex; gap: 16px; justify-content: flex-end;">
-                <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @onclick="HideNewGameConfirmModal">No</button>
+                <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @onclick="HideNewGameConfirmModal" @ref="noButtonRef">No</button>
                 <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @onclick="ConfirmNewGame">Yes</button>
             </div>
         </div>
@@ -74,19 +74,32 @@
     private void HideRulesModal() => showRulesModal = false;
 
     private bool showNewGameConfirmModal = false;
+    private ElementReference noButtonRef;
+    private bool shouldFocusModal = false;
 
-    private void ShowNewGameConfirmModal()
+    private async void ShowNewGameConfirmModal()
     {
         showNewGameConfirmModal = true;
+        shouldFocusModal = true;
         StateHasChanged();
     }
-    private void HideNewGameConfirmModal()
+    private async void HideNewGameConfirmModal()
     {
         showNewGameConfirmModal = false;
+        try
+        {
+            await JS.InvokeVoidAsync("AcesUpFocus.removeFocusTrap");
+        }
+        catch { /* Ignore errors */ }
     }
-    private void ConfirmNewGame()
+    private async void ConfirmNewGame()
     {
         showNewGameConfirmModal = false;
+        try
+        {
+            await JS.InvokeVoidAsync("AcesUpFocus.removeFocusTrap");
+        }
+        catch { /* Ignore errors */ }
         NewGame();
     }
 
@@ -96,6 +109,18 @@
         {
             dotNetRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
+        }
+        
+        // Focus trap when modal opens
+        if (shouldFocusModal && showNewGameConfirmModal)
+        {
+            shouldFocusModal = false;
+            await Task.Delay(50); // Small delay to ensure DOM is ready
+            try
+            {
+                await JS.InvokeVoidAsync("AcesUpFocus.trapFocusInModal", ".modal-dialog");
+            }
+            catch { /* Ignore errors if modal is already closed */ }
         }
     }
 
