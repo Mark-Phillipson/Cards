@@ -2,6 +2,7 @@
 @page "/acesup"
 @using CardGame.Models
 @using CardGame.Services
+
 <PageTitle>Aces Up</PageTitle>
 <div style="display: flex; flex-direction: column; align-items: center;" @ref="mainDivRef">
 @code {
@@ -13,6 +14,12 @@
     [JSInvokable]
     public void OnKeyShortcut(string key)
     {
+        // Ignore keyboard shortcuts when the modal is open
+        if (showNewGameConfirmModal)
+        {
+            return;
+        }
+        
         if (key == "n" || key == "N")
         {
             ShowNewGameConfirmModal();
@@ -27,6 +34,7 @@
             OnCardClick(columnIndex);
         }
     }
+
 
     public void Dispose()
     {
@@ -51,10 +59,10 @@
 @if (showNewGameConfirmModal)
 {
     <div class="modal-overlay">
-        <div class="modal-dialog">
+        <div class="modal-dialog" @onclick:stopPropagation="true">
             <div style="margin-bottom: 18px; font-size: 1.1em;">Start a new game? Your current progress will be lost.</div>
             <div style="display: flex; gap: 16px; justify-content: flex-end;">
-                <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @ref="noBtnRef" @onclick="HideNewGameConfirmModal">No</button>
+                <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @onclick="HideNewGameConfirmModal">No</button>
                 <button class="acesup-btn" style="width: 80px; min-width: 80px; max-width: 100px;" @onclick="ConfirmNewGame">Yes</button>
             </div>
         </div>
@@ -66,13 +74,10 @@
     private void HideRulesModal() => showRulesModal = false;
 
     private bool showNewGameConfirmModal = false;
-    private ElementReference noBtnRef;
-    private bool shouldFocusNoBtn = false;
 
     private void ShowNewGameConfirmModal()
     {
         showNewGameConfirmModal = true;
-        shouldFocusNoBtn = true;
         StateHasChanged();
     }
     private void HideNewGameConfirmModal()
@@ -91,11 +96,6 @@
         {
             dotNetRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
-        }
-        if (shouldFocusNoBtn && showNewGameConfirmModal)
-        {
-            shouldFocusNoBtn = false;
-            await JS.InvokeVoidAsync("AcesUpFocus.setFocus", noBtnRef);
         }
     }
 

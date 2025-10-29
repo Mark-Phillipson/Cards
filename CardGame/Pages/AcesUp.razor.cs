@@ -30,7 +30,8 @@ public partial class AcesUp : ComponentBase
         DeckService.ResetDeck();
         Tableau = new List<Stack<Card>> { new(), new(), new(), new() };
         var allCards = DeckService.DealCards(52);
-        Stock = new Queue<Card>(allCards.Skip(4));
+        Stock = new Queue<Card>(allCards.
+        Skip(4));
         var initial = allCards.Take(4).ToList();
         for (int i = 0; i < 4; i++)
         {
