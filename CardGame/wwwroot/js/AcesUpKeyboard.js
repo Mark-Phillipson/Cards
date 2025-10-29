@@ -5,7 +5,7 @@ window.AcesUpKeyboard = {
         this.dotNetRef = dotNetRef;
         this.handler = (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
-            if (e.key === 'n' || e.key === 'N' || e.key === 'd' || e.key === 'D') {
+            if (e.key === 'n' || e.key === 'N' || e.key === 'd' || e.key === 'D' || e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4') {
                 e.preventDefault();
                 this.dotNetRef.invokeMethodAsync('OnKeyShortcut', e.key);
             }
