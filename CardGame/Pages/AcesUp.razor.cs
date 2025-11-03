@@ -248,7 +248,7 @@ public partial class AcesUp : ComponentBase
 
     private bool CanMoveToEmpty() => Tableau != null && Tableau.Any(p => p != null && p.Count == 0) && Tableau.Any(p => p != null && p.Count > 0);
 
-    public bool CanDeal => !GameOver && Stock.Count >= 4 && !HasMoves();
+    public bool CanDeal => !GameOver && Stock.Count >= 4;
 
     /// <summary>
     /// Returns a list of all cards (by pile index and card) that are currently discardable according to Aces Up rules.

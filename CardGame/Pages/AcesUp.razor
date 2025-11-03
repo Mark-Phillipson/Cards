@@ -72,7 +72,38 @@
 
     [Inject] NavigationManager? Nav { get; set; }
     void GoHome() => Nav?.NavigateTo("/");
-    // ...existing code...
+
+    [JSInvokable]
+    public async Task OnKeyShortcut(string key)
+    {
+        switch (key.ToLower())
+        {
+            case "d":
+                if (CanDeal)
+                {
+                    DealNext();
+                }
+                else
+                {
+                    ShowDebugMessage("Cannot deal: you must discard or move cards first.");
+                }
+                break;
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+                int col = int.Parse(key) - 1;
+                if (Tableau != null && col >= 0 && col < Tableau.Count)
+                {
+                    OnCardClick(col);
+                }
+                break;
+            case "n":
+                ShowNewGameConfirmButtons();
+                break;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 }
     <style>
         .modal-overlay {
