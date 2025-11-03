@@ -1,1 +1,1 @@
- the problem with the design is there's no physical space for the nature of the game and that we have to see all the cards underneath that have been laid  so we can plan the next moves
+When we start a new game a model appears with yes or no buttons if we  press space then the bottoms work correctly. however if we use the eye tracker to click the buttons they fail to work and you do not start a new game. Can we investigate this issue and rectify it please
