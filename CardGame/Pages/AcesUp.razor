@@ -5,7 +5,8 @@
 @using Microsoft.AspNetCore.Components.Web
 
 <PageTitle>Aces Up</PageTitle>
-<div style="display: flex; flex-direction: column; align-items: center;" @ref="mainDivRef">
+<div class="acesup-background-wrapper">
+    <div class="acesup-content-container" @ref="mainDivRef">
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 12px;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
             <button class="acesup-btn" accesskey="n" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowNewGameConfirmButtons">New <span style="font-size:0.85em;opacity:0.7;">(Alt+N)</span></button>
@@ -65,6 +66,7 @@
         {
             dotNetRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
+            await JS.InvokeVoidAsync("AcesUpBackground.setRandomBackground");
         }
         
         // No modal focus trap needed
@@ -305,7 +307,33 @@
         pointer-events: none;
     }
 
+    .acesup-background-wrapper {
+        min-height: 100vh;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px 0;
+    }
+
+    .acesup-content-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.75); /* Increased transparency */
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        max-width: 900px;
+        width: 100%;
+        margin: 20px auto;
+    }
+
     </style>
+    </div>
 </div>
 
     
