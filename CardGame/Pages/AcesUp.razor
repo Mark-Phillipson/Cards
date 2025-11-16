@@ -185,7 +185,7 @@
                                 // Only the top card is checked for discardable/canMoveToEmpty
                                 bool discardable = GetDiscardableCards().Any(x => x.pileIndex == localIndex && x.card.Rank == card.Rank && x.card.Suit == card.Suit && x.card.Value == card.Value);
                                 bool canMoveToEmpty = Tableau[i].Count > 0 && Tableau.Any(p => p != null && p.Count == 0) && !discardable;
-                                var imgStyle = $"height:160px; border: 2px solid black; width: 110px; box-shadow: {(discardable ? "0 0 8px 2px #ff9800" : (canMoveToEmpty ? "0 0 8px 2px #2196f3" : "none"))}; cursor: {(discardable || canMoveToEmpty ? "pointer" : "default")};";
+                                var imgStyle = $"height:160px; border: 2px solid black; width: 110px; background:white; box-shadow: {(discardable ? "0 0 8px 2px #ff9800" : (canMoveToEmpty ? "0 0 8px 2px #2196f3" : "none"))}; cursor: {(discardable || canMoveToEmpty ? "pointer" : "default")};";
                                 <div style="@overlayStyle">
                                     <img src="@card.ImageUrl" alt="@card.Rank of @card.Suit"
                                          style="@imgStyle"
@@ -194,7 +194,7 @@
                             }
                             else
                             {
-                                var imgStyle = "height:160px; border: 2px solid black; width: 110px; mask-image: linear-gradient(to bottom, black 0 36px, transparent 36px 160px); -webkit-mask-image: linear-gradient(to bottom, black 0 36px, transparent 36px 160px); opacity: 1;";
+                                var imgStyle = "height:160px; border: 2px solid black; width: 110px; background:white; mask-image: linear-gradient(to bottom, black 0 36px, transparent 36px 160px); -webkit-mask-image: linear-gradient(to bottom, black 0 36px, transparent 36px 160px); opacity: 1;";
                                 <div style="@overlayStyle">
                                     <img src="@card.ImageUrl" alt="@card.Rank of @card.Suit"
                                          style="@imgStyle" />
@@ -204,7 +204,7 @@
                     }
                     else
                     {
-                        <div style="height:160px; width:110px; border:2px solid black; display:flex; align-items:center; justify-content:center; background:white;"></div>
+                        <div style="height:160px; width:110px; border:2px solid black; display:flex; align-items:center; justify-content:center; background:transparent;"></div>
                     }
                 </div>
             }
