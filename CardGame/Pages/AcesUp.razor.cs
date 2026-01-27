@@ -1,14 +1,16 @@
 using CardGame.Models;
 using CardGame.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace CardGame.Pages;
 
-public partial class AcesUp : ComponentBase
+public partial class AcesUp : ComponentBase, IDisposable
 {
     [Inject] public DeckService DeckService { get; set; } = null!;
+    [Inject] public IJSRuntime JSRuntime { get; set; } = null!;
 
     public List<Stack<Card>> Tableau { get; set; } = new() { new(), new(), new(), new() };
     public Queue<Card> Stock { get; set; } = new();
@@ -249,6 +251,63 @@ public partial class AcesUp : ComponentBase
     private bool CanMoveToEmpty() => Tableau != null && Tableau.Any(p => p != null && p.Count == 0) && Tableau.Any(p => p != null && p.Count > 0);
 
     public bool CanDeal => !GameOver && Stock.Count >= 4;
+
+    // Hover-to-click functionality
+    [JSInvokable]
+    public void UpdateHoverProgress(int pileIndex, int percent)
+    {
+        if (percent == 0)
+        {
+            hoverProgress.Remove(pileIndex);
+        }
+        else
+        {
+            hoverProgress[pileIndex] = percent;
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnCardHoverClick(int pileIndex)
+    {
+        if (!autoPlayEnabled) return;
+        
+        // Clear hover progress
+        hoverProgress.Remove(pileIndex);
+        
+        // Handle Deal button (pile index -1)
+        if (pileIndex == -1)
+        {
+            DealNext();
+        }
+        else
+        {
+            // Trigger the existing card click handler
+            OnCardClick(pileIndex);
+        }
+    }
+
+    private async Task OnToggleAutoPlay()
+    {
+        // autoPlayEnabled has already been updated by @bind:after
+        Console.WriteLine($"OnToggleAutoPlay: autoPlayEnabled = {autoPlayEnabled}");
+        
+        // Update accessibility message
+        autoPlayStatusMessage = autoPlayEnabled ? "Auto-play enabled" : "Auto-play disabled";
+        
+        // Update JavaScript listener state
+        if (dotNetRef != null)
+        {
+            await JSRuntime.InvokeVoidAsync("updateAcesUpHoverEnabled", autoPlayEnabled);
+        }
+        
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        toastTimer?.Dispose();
+    }
 
     /// <summary>
     /// Returns a list of all cards (by pile index and card) that are currently discardable according to Aces Up rules.

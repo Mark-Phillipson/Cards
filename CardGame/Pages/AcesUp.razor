@@ -13,6 +13,13 @@
             <button class="acesup-btn" accesskey="u" style="margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;" @onclick="Undo" disabled="@(!CanUndo)">Undo <span style="font-size:0.85em;opacity:0.7;">(Alt+U)</span></button>
             <button class="acesup-btn" accesskey="h" style="margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;" @onclick="GoHome">Home <span style="font-size:0.85em;opacity:0.7;">(Alt+H)</span></button>
             <button class="acesup-btn" accesskey="r" style="margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowRulesModal">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
+            <div style="margin-top: 16px; width: 150px;">
+                <label style="display: flex; align-items: center; cursor: pointer; color: #333; font-size: 0.95em; font-weight: 600;">
+                    <input type="checkbox" @bind="autoPlayEnabled" @bind:after="OnToggleAutoPlay" style="margin-right: 8px; cursor: pointer;" />
+                    <span>Auto-play on hover</span>
+                </label>
+                <div aria-live="polite" aria-atomic="true" style="position: absolute; left: -10000px;">@autoPlayStatusMessage</div>
+            </div>
         </div>
 @if (showRulesModal)
 {
@@ -24,6 +31,12 @@
     private DotNetObjectReference<AcesUp>? dotNetRef;
     private bool showRulesModal = false;
     private bool showNewGameConfirmButtons = false;
+    
+    // Hover-to-click state
+    private bool autoPlayEnabled = false;
+    private Dictionary<int, int> hoverProgress = new();
+    private string autoPlayStatusMessage = "";
+    
     private void ShowNewGameConfirmButtons()
     {
         showNewGameConfirmButtons = true;
@@ -67,6 +80,19 @@
             dotNetRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("AcesUpKeyboard.init", dotNetRef);
             await JS.InvokeVoidAsync("AcesUpBackground.setRandomBackground");
+            await JS.InvokeVoidAsync("initAcesUpHover", dotNetRef, autoPlayEnabled);
+        }
+        else if (autoPlayEnabled)
+        {
+            // Refresh hover listeners after DOM updates (wrap in try-catch for safety)
+            try
+            {
+                await JS.InvokeVoidAsync("refreshAcesUpHoverListeners");
+            }
+            catch
+            {
+                // Function may not exist in cached version - will work after hard refresh
+            }
         }
         
         // No modal focus trap needed
@@ -143,11 +169,27 @@
             </div>
         }
         <div style="flex: 1; text-align: right;">
-            <div class="stock" @onclick="DealNext" style="display: inline-block; cursor: @(CanDeal ? "pointer" : "default"); position: relative;">
+            <div class="stock" @onclick="DealNext" style="display: inline-block; cursor: @(CanDeal ? "pointer" : "default"); position: relative;" data-pile-index="deal" data-hoverable="@(CanDeal ? "true" : "false")">
                 @if (Stock.Count > 0)
                 {
                     <img src="/cards/Cards-Reverse.svg" alt="stock" style="height:160px; width:110px; border:2px solid black; background:white; vertical-align: middle;" />
                     <div style="position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%); font-size: 0.85em; opacity: 0.7; white-space: nowrap;">Press D to Deal</div>
+                    @if (hoverProgress.ContainsKey(-1) && hoverProgress[-1] > 0)
+                    {
+                        var circumference = 2 * Math.PI * 16;
+                        var dashArray = $"{circumference * hoverProgress[-1] / 100} {circumference}";
+                        <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"
+                             width="50" height="50">
+                            <circle cx="25" cy="25" r="16"
+                                    stroke="#1976d2"
+                                    stroke-width="4"
+                                    fill="transparent"
+                                    style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                        </svg>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: 1.2em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;">
+                            @hoverProgress[-1]%
+                        </div>
+                    }
                 }
                 else
                 {
@@ -189,7 +231,26 @@
                                 <div style="@overlayStyle">
                                     <img src="@card.ImageUrl" alt="@card.Rank of @card.Suit"
                                          style="@imgStyle"
+                                         data-pile-index="@localIndex"
+                                         data-hoverable="true"
                                          @onclick="() => OnCardClick(localIndex)" @onclick:stopPropagation />
+                                    @if (hoverProgress.ContainsKey(localIndex) && hoverProgress[localIndex] > 0)
+                                    {
+                                        var circumference = 2 * Math.PI * 16;
+                                        var dashArray = $"{circumference * hoverProgress[localIndex] / 100} {circumference}";
+                                        var remainingSeconds = ((100 - hoverProgress[localIndex]) * 2.0 / 100).ToString("F1");
+                                        <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"
+                                             width="50" height="50">
+                                            <circle cx="25" cy="25" r="16"
+                                                    stroke="#1976d2"
+                                                    stroke-width="4"
+                                                    fill="transparent"
+                                                    style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                                        </svg>
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: 1.2em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;">
+                                            @hoverProgress[localIndex]%
+                                        </div>
+                                    }
                                 </div>
                             }
                             else
@@ -338,5 +399,4 @@
     </style>
     </div>
 </div>
-
     

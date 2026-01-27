@@ -1,1 +1,3 @@
-When we start a new game a model appears with yes or no buttons if we  press space then the bottoms work correctly. however if we use the eye tracker to click the buttons they fail to work and you do not start a new game. Can we investigate this issue and rectify it please
+When playing the game I would like to be able to hover the mouse over a  card and if the hover is over half a second it should perform a click action on that card. Please provide the code to implement this feature.
+
+ this should be made to the Aces up card game
