@@ -9,13 +9,98 @@
     <div class="acesup-content-container" @ref="mainDivRef">
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 12px;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
-            <button class="acesup-btn" accesskey="n" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowNewGameConfirmButtons">New <span style="font-size:0.85em;opacity:0.7;">(Alt+N)</span></button>
-            <button class="acesup-btn" accesskey="u" style="margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;" @onclick="Undo" disabled="@(!CanUndo)">Undo <span style="font-size:0.85em;opacity:0.7;">(Alt+U)</span></button>
-            <button class="acesup-btn" accesskey="h" style="margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;" @onclick="GoHome">Home <span style="font-size:0.85em;opacity:0.7;">(Alt+H)</span></button>
-            <button class="acesup-btn" accesskey="r" style="margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowRulesModal">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
+            <div style="position: relative; width: 150px; min-width: 150px; max-width: 150px;">
+            <button class="acesup-btn" accesskey="n" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowNewGameConfirmButtons" data-hoverable="true" data-button-id="new-game">New <span style="font-size:0.85em;opacity:0.7;">(Alt+N)</span></button>
+            @if (hoverProgress.ContainsKey(-2) && hoverProgress[-2] > 0)
+            {
+                var circumference = 2 * Math.PI * 12;
+                var dashArray = $"{circumference * hoverProgress[-2] / 100} {circumference}";
+                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
+                    <circle cx="18" cy="18" r="12"
+                            stroke="#1976d2"
+                            stroke-width="3"
+                            fill="transparent"
+                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                </svg>
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                    @hoverProgress[-2]%
+                </div>
+            }
+        </div>
+            <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
+            <button class="acesup-btn" accesskey="u" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="Undo" disabled="@(!CanUndo)" data-hoverable="@(CanUndo ? "true" : "false")" data-button-id="undo">Undo <span style="font-size:0.85em;opacity:0.7;">(Alt+U)</span></button>
+            @if (hoverProgress.ContainsKey(-5) && hoverProgress[-5] > 0)
+            {
+                var circumference = 2 * Math.PI * 12;
+                var dashArray = $"{circumference * hoverProgress[-5] / 100} {circumference}";
+                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
+                    <circle cx="18" cy="18" r="12"
+                            stroke="#1976d2"
+                            stroke-width="3"
+                            fill="transparent"
+                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                </svg>
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                    @hoverProgress[-5]%
+                </div>
+            }
+        </div>
+            <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
+            <button class="acesup-btn" accesskey="h" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="GoHome" data-hoverable="true" data-button-id="home">Home <span style="font-size:0.85em;opacity:0.7;">(Alt+H)</span></button>
+            @if (hoverProgress.ContainsKey(-6) && hoverProgress[-6] > 0)
+            {
+                var circumference = 2 * Math.PI * 12;
+                var dashArray = $"{circumference * hoverProgress[-6] / 100} {circumference}";
+                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
+                    <circle cx="18" cy="18" r="12"
+                            stroke="#1976d2"
+                            stroke-width="3"
+                            fill="transparent"
+                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                </svg>
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                    @hoverProgress[-6]%
+                </div>
+            }
+        </div>
+            <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
+            <button class="acesup-btn" accesskey="r" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowRulesModal" data-hoverable="true" data-button-id="rules">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
+            @if (hoverProgress.ContainsKey(-7) && hoverProgress[-7] > 0)
+            {
+                var circumference = 2 * Math.PI * 12;
+                var dashArray = $"{circumference * hoverProgress[-7] / 100} {circumference}";
+                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
+                    <circle cx="18" cy="18" r="12"
+                            stroke="#1976d2"
+                            stroke-width="3"
+                            fill="transparent"
+                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                </svg>
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                    @hoverProgress[-7]%
+                </div>
+            }
+        </div>
             <div style="margin-top: 16px; width: 150px;">
-                <label style="display: flex; align-items: center; cursor: pointer; color: #333; font-size: 0.95em; font-weight: 600;">
-                    <input type="checkbox" @bind="autoPlayEnabled" @bind:after="OnToggleAutoPlay" style="margin-right: 8px; cursor: pointer;" />
+                <label style="display: flex; align-items: center; cursor: pointer; color: #333; font-size: 0.95em; font-weight: 600;" data-hoverable="true" data-button-id="autoplay-toggle">
+                    <div style="position: relative; display: inline-block;">
+                    <input type="checkbox" @bind="autoPlayEnabled" @bind:after="OnToggleAutoPlay" style="margin-right: 8px; cursor: pointer;" data-hoverable="true" data-button-id="autoplay-toggle" />
+                    @if (hoverProgress.ContainsKey(-8) && hoverProgress[-8] > 0)
+                    {
+                        var circumference = 2 * Math.PI * 8;
+                        var dashArray = $"{circumference * hoverProgress[-8] / 100} {circumference}";
+                        <svg style="position: absolute; top: 50%; right: -26px; transform: translateY(-50%); pointer-events: none;" width="24" height="24">
+                            <circle cx="12" cy="12" r="8"
+                                    stroke="#1976d2"
+                                    stroke-width="2"
+                                    fill="transparent"
+                                    style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                        </svg>
+                        <div style="position: absolute; top: 50%; right: -26px; transform: translateY(-50%); pointer-events: none; font-size: 0.75em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                            @hoverProgress[-8]%
+                        </div>
+                    }
+                </div>
                     <span>Auto-play on hover</span>
                 </label>
                 <div aria-live="polite" aria-atomic="true" style="position: absolute; left: -10000px;">@autoPlayStatusMessage</div>
@@ -163,8 +248,42 @@
             <div style="margin: 0 auto 18px auto; display: flex; flex-direction: column; align-items: center; max-width: 400px; background: #f7f7f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 18px 24px;">
                 <div style="margin-bottom: 16px; font-size: 1.15em; font-weight: 500; text-align: center; color: #333;">Start a new game?<br /><span style="font-size: 0.98em; font-weight: 400; color: #666;">Your current progress will be lost.</span></div>
                 <div style="display: flex; gap: 24px; justify-content: center;">
-                    <button class="acesup-btn" type="button" tabindex="0" aria-label="Cancel and keep current game" style="width: 90px; min-width: 80px; max-width: 120px; font-size: 1.08em;" @onclick="HideNewGameConfirmButtons">No</button>
-                    <button class="acesup-btn" type="button" tabindex="0" aria-label="Start new game and lose progress" style="width: 90px; min-width: 80px; max-width: 120px; font-size: 1.08em;" @onclick="ConfirmNewGame">Yes</button>
+                    <div style="position: relative; width: 90px; min-width: 80px; max-width: 120px;">
+                        <button class="acesup-btn" type="button" tabindex="0" aria-label="Cancel and keep current game" style="width: 90px; min-width: 80px; max-width: 120px; font-size: 1.08em;" @onclick="HideNewGameConfirmButtons" data-hoverable="true" data-button-id="confirm-new-no">No</button>
+                        @if (hoverProgress.ContainsKey(-4) && hoverProgress[-4] > 0)
+                        {
+                            var circumference = 2 * Math.PI * 10;
+                            var dashArray = $"{circumference * hoverProgress[-4] / 100} {circumference}";
+                            <svg style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none;" width="30" height="30">
+                                <circle cx="15" cy="15" r="10"
+                                        stroke="#1976d2"
+                                        stroke-width="3"
+                                        fill="transparent"
+                                        style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                            </svg>
+                            <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                                @hoverProgress[-4]%
+                            </div>
+                        }
+                    </div>
+                    <div style="position: relative; width: 90px; min-width: 80px; max-width: 120px;">
+                        <button class="acesup-btn" type="button" tabindex="0" aria-label="Start new game and lose progress" style="width: 90px; min-width: 80px; max-width: 120px; font-size: 1.08em;" @onclick="ConfirmNewGame" data-hoverable="true" data-button-id="confirm-new-yes">Yes</button>
+                        @if (hoverProgress.ContainsKey(-3) && hoverProgress[-3] > 0)
+                        {
+                            var circumference = 2 * Math.PI * 10;
+                            var dashArray = $"{circumference * hoverProgress[-3] / 100} {circumference}";
+                            <svg style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none;" width="30" height="30">
+                                <circle cx="15" cy="15" r="10"
+                                        stroke="#1976d2"
+                                        stroke-width="3"
+                                        fill="transparent"
+                                        style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                            </svg>
+                            <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                                @hoverProgress[-3]%
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         }

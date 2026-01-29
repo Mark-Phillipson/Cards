@@ -287,6 +287,51 @@ public partial class AcesUp : ComponentBase, IDisposable
         }
     }
 
+    [JSInvokable]
+    public async Task OnButtonHoverClick(string buttonId)
+    {
+        // Allow the autoplay-toggle to be activated even when autoPlayEnabled is currently false
+        if (buttonId != "autoplay-toggle" && !autoPlayEnabled) return;
+
+        // When a button hover completes, invoke the mapped action and show a brief toast for accessibility feedback
+        switch (buttonId)
+        {
+            case "autoplay-toggle":
+                // Toggle the checkbox programmatically and run the same after-bind logic
+                autoPlayEnabled = !autoPlayEnabled;
+                await OnToggleAutoPlay();
+                ShowToastMessage(autoPlayEnabled ? "Auto-play enabled via hover" : "Auto-play disabled via hover");
+                break;
+            case "new-game":
+                ShowNewGameConfirmButtons();
+                ShowToastMessage("New game confirmation shown via hover");
+                break;
+            case "confirm-new-yes":
+                ConfirmNewGame();
+                ShowToastMessage("New game started via hover");
+                break;
+            case "confirm-new-no":
+                HideNewGameConfirmButtons();
+                ShowToastMessage("New game cancelled via hover");
+                break;
+            case "undo":
+                if (CanUndo)
+                {
+                    Undo();
+                    ShowToastMessage("Undo triggered via hover");
+                }
+                break;
+            case "home":
+                GoHome();
+                break;
+            case "rules":
+                ShowRulesModal();
+                break;
+        }
+
+        StateHasChanged();
+    }
+
     private async Task OnToggleAutoPlay()
     {
         // autoPlayEnabled has already been updated by @bind:after

@@ -1,3 +1,4 @@
-When playing the game I would like to be able to hover the mouse over a  card and if the hover is over half a second it should perform a click action on that card. Please provide the code to implement this feature.
 
- this should be made to the Aces up card game
+Regarding the auto click feature can we extend this to the buttons as well as the cards so we could hover over for example start new game button and it would have the same functionality as when hovering over a card.
+
+ including when we have a confirmation when starting a new game.

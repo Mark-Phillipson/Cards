@@ -19,12 +19,9 @@ window.initAcesUpHover = function (dotNetReference, enabled) {
     // Clean up existing listeners and timers
     cleanup();
     
-    if (enabled) {
-        console.log('AcesUpHover: Attaching listeners because enabled = true');
-        attachListeners();
-    } else {
-        console.log('AcesUpHover: Not attaching listeners because enabled = false');
-    }
+    // Always attach listeners so the autoplay-toggle control can be hovered even when auto-play is disabled
+    console.log('AcesUpHover: Attaching listeners (note: some actions respect global enabled state)');
+    attachListeners();
 };
 
 /**
@@ -35,15 +32,12 @@ window.updateAcesUpHoverEnabled = function (enabled) {
     console.log('AcesUpHover: updateAcesUpHoverEnabled called with enabled =', enabled);
     isEnabled = enabled;
     
-    // Cancel all active timers when disabled
+    // Cancel all active timers when toggling
     cleanup();
     
-    if (enabled) {
-        console.log('AcesUpHover: Attaching listeners');
-        attachListeners();
-    } else {
-        console.log('AcesUpHover: Detached listeners');
-    }
+    // Re-attach listeners (autoplay-toggle will work regardless of enabled state)
+    console.log('AcesUpHover: Re-attaching listeners after enabled change');
+    attachListeners();
 };
 
 /**
@@ -60,26 +54,49 @@ window.refreshAcesUpHoverListeners = function () {
 /**
  * Attach mouse event listeners to hoverable cards
  */
+const BUTTON_ID_MAP = {
+    'new-game': -2,
+    'confirm-new-yes': -3,
+    'confirm-new-no': -4,
+    'undo': -5,
+    'home': -6,
+    'rules': -7,
+    'autoplay-toggle': -8
+};
+
 function attachListeners() {
     // Remove existing listeners first
-    const cards = document.querySelectorAll('[data-hoverable="true"]');
+    const items = document.querySelectorAll('[data-hoverable="true"]');
     
-    console.log(`AcesUpHover: Found ${cards.length} cards with data-hoverable="true"`);
+    console.log(`AcesUpHover: Found ${items.length} hoverable elements`);
     
-    cards.forEach((card, index) => {
-        const pileIndex = card.getAttribute('data-pile-index');
-        console.log(`AcesUpHover: Card ${index} has pile-index = ${pileIndex}`);
+    items.forEach((el, index) => {
+        const pileIndexAttr = el.getAttribute('data-pile-index');
+        const buttonId = el.getAttribute('data-button-id');
+        console.log(`AcesUpHover: Element ${index} pile-index = ${pileIndexAttr}, button-id = ${buttonId}`);
         
+        // Skip disabled elements
+        if (el.disabled) {
+            console.log('AcesUpHover: Skipping disabled element', el);
+            // Make sure progress is cleared for disabled elements
+            if (pileIndexAttr === 'deal') {
+                dotNetRef && dotNetRef.invokeMethodAsync('UpdateHoverProgress', -1, 0);
+            } else if (buttonId && BUTTON_ID_MAP[buttonId] !== undefined) {
+                dotNetRef && dotNetRef.invokeMethodAsync('UpdateHoverProgress', BUTTON_ID_MAP[buttonId], 0);
+            }
+            return;
+        }
+
         // Remove old listeners if they exist
-        card.removeEventListener('mouseenter', handleMouseEnter);
-        card.removeEventListener('mouseleave', handleMouseLeave);
+        el.removeEventListener('mouseenter', handleMouseEnter);
+        el.removeEventListener('mouseleave', handleMouseLeave);
         
         // Add new listeners
-        card.addEventListener('mouseenter', handleMouseEnter);
-        card.addEventListener('mouseleave', handleMouseLeave);
+        el.addEventListener('mouseenter', handleMouseEnter);
+        el.addEventListener('mouseleave', handleMouseLeave);
     });
     
-    console.log(`AcesUpHover: Attached listeners to ${cards.length} cards`);
+    console.log(`AcesUpHover: Attached listeners to ${items.length} elements`);
 }
 
 /**
@@ -87,28 +104,45 @@ function attachListeners() {
  * @param {MouseEvent} event - Mouse event
  */
 function handleMouseEnter(event) {
-    console.log('AcesUpHover: mouseenter event triggered, isEnabled =', isEnabled, 'dotNetRef =', !!dotNetRef);
-    
-    if (!isEnabled || !dotNetRef) {
-        console.log('AcesUpHover: Aborting - not enabled or no dotNetRef');
+    const el = event.currentTarget;
+    const buttonId = el.getAttribute('data-button-id');
+
+    // Allow the autoplay-toggle control to be hovered even when global auto-play is disabled
+    if (!dotNetRef) {
+        console.log('AcesUpHover: Aborting - no dotNetRef');
         return;
     }
-    
-    const card = event.currentTarget;
-    const pileIndexAttr = card.getAttribute('data-pile-index');
-    
-    // Handle "deal" as pile index -1
-    const pileIndex = pileIndexAttr === 'deal' ? -1 : parseInt(pileIndexAttr);
-    
-    console.log('AcesUpHover: Starting timer for pile', pileIndex);
-    
-    if (isNaN(pileIndex)) {
-        console.error('AcesUpHover: Invalid pile index:', pileIndexAttr);
+    if (!isEnabled && buttonId !== 'autoplay-toggle') {
+        console.log('AcesUpHover: Aborting - global auto-play disabled and element is not autoplay-toggle');
         return;
     }
-    
-    // Clear any existing timer for this pile
-    clearTimerForPile(pileIndex);
+
+    const pileIndexAttr = el.getAttribute('data-pile-index');
+
+    let mappedIndex = null;
+    let isButton = false;
+
+    if (pileIndexAttr !== null) {
+        mappedIndex = (pileIndexAttr === 'deal') ? -1 : parseInt(pileIndexAttr);
+    }
+    else if (buttonId !== null) {
+        isButton = true;
+        if (BUTTON_ID_MAP[buttonId] === undefined) {
+            console.error('AcesUpHover: Unknown button id:', buttonId);
+            return;
+        }
+        mappedIndex = BUTTON_ID_MAP[buttonId];
+    }
+
+    console.log('AcesUpHover: Starting timer for', isButton ? `button ${buttonId}` : `pile ${mappedIndex}`);
+
+    if (mappedIndex === null || isNaN(mappedIndex)) {
+        console.error('AcesUpHover: Invalid mapped index:', mappedIndex);
+        return;
+    }
+
+    // Clear any existing timer for this mapped index
+    clearTimerForPile(mappedIndex);
     
     // Start progress updates (every 50ms for 2000ms total = 40 updates)
     let progress = 0;
@@ -116,33 +150,38 @@ function handleMouseEnter(event) {
     const totalDuration = 2000; // ms (2 seconds)
     const progressStep = 100 / (totalDuration / updateInterval);
     
-    progressIntervals[pileIndex] = setInterval(() => {
+    progressIntervals[mappedIndex] = setInterval(() => {
         progress += progressStep;
         
-        console.log(`AcesUpHover: Pile ${pileIndex} progress = ${Math.round(progress)}%`);
+        console.log(`AcesUpHover: Index ${mappedIndex} progress = ${Math.round(progress)}%`);
         
         if (progress >= 100) {
             progress = 100;
-            console.log(`AcesUpHover: Pile ${pileIndex} reached 100%, triggering click`);
-            clearTimerForPile(pileIndex);
+            console.log(`AcesUpHover: Index ${mappedIndex} reached 100%, triggering action`);
+            clearTimerForPile(mappedIndex);
             
-            // Trigger click action
-            if (dotNetRef && isEnabled) {
-                console.log('AcesUpHover: Invoking OnCardHoverClick for pile', pileIndex);
-                dotNetRef.invokeMethodAsync('OnCardHoverClick', pileIndex);
+            // Trigger click/action
+            if (dotNetRef) {
+                if (isButton) {
+                    console.log('AcesUpHover: Invoking OnButtonHoverClick for', buttonId);
+                    dotNetRef.invokeMethodAsync('OnButtonHoverClick', buttonId);
+                } else {
+                    console.log('AcesUpHover: Invoking OnCardHoverClick for pile', mappedIndex);
+                    dotNetRef.invokeMethodAsync('OnCardHoverClick', mappedIndex);
+                }
             } else {
-                console.log('AcesUpHover: Cannot invoke - dotNetRef or isEnabled is false');
+                console.log('AcesUpHover: Cannot invoke - no dotNetRef');
             }
         } else {
             // Update progress visual
-            if (dotNetRef && isEnabled) {
-                dotNetRef.invokeMethodAsync('UpdateHoverProgress', pileIndex, Math.round(progress));
+            if (dotNetRef) {
+                dotNetRef.invokeMethodAsync('UpdateHoverProgress', mappedIndex, Math.round(progress));
             }
         }
     }, updateInterval);
     
     // Store in hoverTimers for cleanup
-    hoverTimers[pileIndex] = progressIntervals[pileIndex];
+    hoverTimers[mappedIndex] = progressIntervals[mappedIndex];
 }
 
 /**
@@ -150,19 +189,23 @@ function handleMouseEnter(event) {
  * @param {MouseEvent} event - Mouse event
  */
 function handleMouseLeave(event) {
-    const card = event.currentTarget;
-    const pileIndexAttr = card.getAttribute('data-pile-index');
-    const pileIndex = pileIndexAttr === 'deal' ? -1 : parseInt(pileIndexAttr);
-    
-    console.log('AcesUpHover: mouseleave event for pile', pileIndex, '- clearing timer');
-    
-    if (isNaN(pileIndex)) return;
-    
+    const el = event.currentTarget;
+    const pileIndexAttr = el.getAttribute('data-pile-index');
+    const buttonId = el.getAttribute('data-button-id');
+
+    let mappedIndex = null;
+    if (pileIndexAttr !== null) mappedIndex = (pileIndexAttr === 'deal') ? -1 : parseInt(pileIndexAttr);
+    else if (buttonId !== null && BUTTON_ID_MAP[buttonId] !== undefined) mappedIndex = BUTTON_ID_MAP[buttonId];
+
+    console.log('AcesUpHover: mouseleave event for index', mappedIndex, '- clearing timer');
+
+    if (mappedIndex === null || isNaN(mappedIndex)) return;
+
     // Clear timer and reset progress
-    clearTimerForPile(pileIndex);
-    
+    clearTimerForPile(mappedIndex);
+
     if (dotNetRef) {
-        dotNetRef.invokeMethodAsync('UpdateHoverProgress', pileIndex, 0);
+        dotNetRef.invokeMethodAsync('UpdateHoverProgress', mappedIndex, 0);
     }
 }
 
@@ -191,11 +234,13 @@ function cleanup() {
         clearTimerForPile(parseInt(pileIndex));
     });
     
-    // Reset progress for all piles
+    // Reset progress for all piles and button indices
     if (dotNetRef) {
         for (let i = 0; i < 4; i++) {
             dotNetRef.invokeMethodAsync('UpdateHoverProgress', i, 0);
         }
+        // Reset deal and button indexes
+        [-1, -2, -3, -4, -5, -6, -7, -8].forEach(idx => dotNetRef.invokeMethodAsync('UpdateHoverProgress', idx, 0));
     }
     
     // Remove event listeners from all cards
