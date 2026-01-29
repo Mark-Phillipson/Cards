@@ -70,6 +70,18 @@ Next steps and optional improvements
 - Add instructions for custom domains, HTTPS, and environment variables if you need server-side configuration.
 
 
+Aces Up — Auto-play (hover-to-click)
+-----------------------------------
+- The **Aces Up** page includes an optional *Auto-play on hover* feature that will trigger the same actions as clicking when you hover over a card, the Deal area, or certain buttons for a short configurable delay.
+- You can enable it with the **Auto-play on hover** checkbox on the Aces Up page and configure the delay using the **Delay before auto-submit (ms)** field.
+  - **Default:** 500 ms
+  - **Valid range:** 50 — 10000 ms (values outside this range show an inline validation error)
+  - Changes take effect immediately and are communicated to the in-page JS behavior.
+- Accessibility and notes:
+  - The toggle exposes a brief status message via an off-screen, aria-live region when changed.
+  - The delay label includes an accessible info tooltip explaining purpose, valid range, and default value.
+- Developer API (JS interop): `initAcesUpHover(dotNetRef, enabled, delayMs)`, `updateAcesUpHoverEnabled(enabled, delayMs)`, and `updateAcesUpHoverDelay(delayMs)` are implemented and used by the Blazor page to keep JS in sync with user settings.
+
 ---------------------
 - Remove references to Vercel: DONE (deleted `README-vercel.md` and `vercel.json`).
 - Document how to publish to Azure Static Web Apps: DONE (this `README.md`).

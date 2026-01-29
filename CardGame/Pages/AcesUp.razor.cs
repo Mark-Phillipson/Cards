@@ -332,6 +332,44 @@ public partial class AcesUp : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    private int hoverDelayMs = 500;
+    private string hoverDelayError = "";
+
+    private async Task OnHoverDelayInput(ChangeEventArgs e)
+    {
+        // Validate input and update JS with new delay when valid
+        if (e?.Value == null)
+        {
+            hoverDelayError = "Please enter a value between 50 and 10000 ms.";
+            StateHasChanged();
+            return;
+        }
+
+        if (!int.TryParse(e.Value.ToString(), out var v))
+        {
+            hoverDelayError = "Please enter a valid number.";
+            StateHasChanged();
+            return;
+        }
+
+        hoverDelayMs = v;
+        if (hoverDelayMs < 50 || hoverDelayMs > 10000)
+        {
+            hoverDelayError = "Please enter a value between 50 and 10000 ms.";
+        }
+        else
+        {
+            hoverDelayError = "";
+            // Inform JS of the updated delay
+            if (dotNetRef != null)
+            {
+                await JSRuntime.InvokeVoidAsync("updateAcesUpHoverDelay", hoverDelayMs);
+            }
+        }
+
+        StateHasChanged();
+    }
+
     private async Task OnToggleAutoPlay()
     {
         // autoPlayEnabled has already been updated by @bind:after
@@ -343,7 +381,7 @@ public partial class AcesUp : ComponentBase, IDisposable
         // Update JavaScript listener state
         if (dotNetRef != null)
         {
-            await JSRuntime.InvokeVoidAsync("updateAcesUpHoverEnabled", autoPlayEnabled);
+            await JSRuntime.InvokeVoidAsync("updateAcesUpHoverEnabled", autoPlayEnabled, hoverDelayMs);
         }
         
         StateHasChanged();

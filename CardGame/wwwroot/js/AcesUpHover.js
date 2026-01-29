@@ -5,16 +5,19 @@ let dotNetRef = null;
 let isEnabled = false;
 let hoverTimers = {}; // Track active timers by pile index
 let progressIntervals = {}; // Track progress update intervals by pile index
+let hoverTotalDuration = 500; // milliseconds, updated from Blazor (default 500ms)
+const updateInterval = 50; // ms between progress updates
 
 /**
  * Initialize hover detection for Aces Up cards
  * @param {any} dotNetReference - DotNet object reference for C# callbacks
  * @param {boolean} enabled - Whether auto-play is enabled
  */
-window.initAcesUpHover = function (dotNetReference, enabled) {
-    console.log('AcesUpHover: Initializing with enabled =', enabled);
+window.initAcesUpHover = function (dotNetReference, enabled, delayMs) {
+    console.log('AcesUpHover: Initializing with enabled =', enabled, 'delayMs =', delayMs);
     dotNetRef = dotNetReference;
     isEnabled = enabled;
+    hoverTotalDuration = (typeof delayMs === 'number' && !isNaN(delayMs)) ? delayMs : hoverTotalDuration;
     
     // Clean up existing listeners and timers
     cleanup();
@@ -28,9 +31,10 @@ window.initAcesUpHover = function (dotNetReference, enabled) {
  * Update enabled state and attach/detach listeners accordingly
  * @param {boolean} enabled - Whether auto-play is enabled
  */
-window.updateAcesUpHoverEnabled = function (enabled) {
-    console.log('AcesUpHover: updateAcesUpHoverEnabled called with enabled =', enabled);
+window.updateAcesUpHoverEnabled = function (enabled, delayMs) {
+    console.log('AcesUpHover: updateAcesUpHoverEnabled called with enabled =', enabled, 'delayMs =', delayMs);
     isEnabled = enabled;
+    if (typeof delayMs === 'number' && !isNaN(delayMs)) hoverTotalDuration = delayMs;
     
     // Cancel all active timers when toggling
     cleanup();
@@ -38,6 +42,14 @@ window.updateAcesUpHoverEnabled = function (enabled) {
     // Re-attach listeners (autoplay-toggle will work regardless of enabled state)
     console.log('AcesUpHover: Re-attaching listeners after enabled change');
     attachListeners();
+};
+
+// Allow updating delay independently
+window.updateAcesUpHoverDelay = function (delayMs) {
+    console.log('AcesUpHover: updateAcesUpHoverDelay called with delayMs =', delayMs);
+    if (typeof delayMs === 'number' && !isNaN(delayMs)) {
+        hoverTotalDuration = delayMs;
+    }
 };
 
 /**
@@ -144,11 +156,9 @@ function handleMouseEnter(event) {
     // Clear any existing timer for this mapped index
     clearTimerForPile(mappedIndex);
     
-    // Start progress updates (every 50ms for 2000ms total = 40 updates)
+    // Start progress updates
     let progress = 0;
-    const updateInterval = 50; // ms
-    const totalDuration = 2000; // ms (2 seconds)
-    const progressStep = 100 / (totalDuration / updateInterval);
+    const progressStep = 100 / Math.max(1, (hoverTotalDuration / updateInterval));
     
     progressIntervals[mappedIndex] = setInterval(() => {
         progress += progressStep;
