@@ -71,10 +71,10 @@ const BUTTON_ID_MAP = {
     'confirm-new-yes': -3,
     'confirm-new-no': -4,
     'undo': -5,
-    'home': -6,
-    'rules': -7,
     'autoplay-toggle': -8
 };
+// Note: 'home' and 'rules' intentionally omitted to disable hover-to-click for navigation buttons
+
 
 function attachListeners() {
     // Remove existing listeners first
@@ -96,6 +96,15 @@ function attachListeners() {
             } else if (buttonId && BUTTON_ID_MAP[buttonId] !== undefined) {
                 dotNetRef && dotNetRef.invokeMethodAsync('UpdateHoverProgress', BUTTON_ID_MAP[buttonId], 0);
             }
+            return;
+        }
+
+        // Skip navigation buttons (Home and Rules) - disable hover-to-click for these
+        if (buttonId === 'home' || buttonId === 'rules') {
+            console.log('AcesUpHover: Skipping hover listeners for navigation button', buttonId);
+            // Clear any legacy progress indices if present
+            if (buttonId === 'home') dotNetRef && dotNetRef.invokeMethodAsync('UpdateHoverProgress', -6, 0);
+            if (buttonId === 'rules') dotNetRef && dotNetRef.invokeMethodAsync('UpdateHoverProgress', -7, 0);
             return;
         }
 
@@ -124,6 +133,13 @@ function handleMouseEnter(event) {
         console.log('AcesUpHover: Aborting - no dotNetRef');
         return;
     }
+
+    // Ignore navigation buttons (Home/Rules) - these are not allowed to be auto-clicked
+    if (buttonId === 'home' || buttonId === 'rules') {
+        console.log('AcesUpHover: Ignoring hover enter for navigation button', buttonId);
+        return;
+    }
+
     if (!isEnabled && buttonId !== 'autoplay-toggle') {
         console.log('AcesUpHover: Aborting - global auto-play disabled and element is not autoplay-toggle');
         return;

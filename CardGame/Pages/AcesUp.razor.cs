@@ -195,6 +195,34 @@ public partial class AcesUp : ComponentBase, IDisposable
         toastTimer.Start();
     }
 
+    // Accessibility: announce and show a brief toast when hover-to-click is intentionally disabled
+    private string hoverDisabledStatusMessage = "";
+    private System.Timers.Timer? hoverDisabledTimer;
+
+    private void ShowHoverDisabledToast(string which)
+    {
+        var text = $"Hover-to-click is intentionally disabled for the {which} button.";
+        hoverDisabledStatusMessage = text;
+        // Also show the visible toast for sighted users
+        ShowToastMessage(text);
+
+        hoverDisabledTimer?.Dispose();
+        hoverDisabledTimer = new System.Timers.Timer(2000);
+        hoverDisabledTimer.Elapsed += (s, e) =>
+        {
+            hoverDisabledStatusMessage = "";
+            hoverDisabledTimer?.Dispose();
+            InvokeAsync(StateHasChanged);
+        };
+        hoverDisabledTimer.AutoReset = false;
+        hoverDisabledTimer.Start();
+
+        StateHasChanged();
+    }
+
+    private void ShowHoverDisabledToastHome() => ShowHoverDisabledToast("Home");
+    private void ShowHoverDisabledToastRules() => ShowHoverDisabledToast("Rules");
+
     public void TryMoveToEmpty(int pileIndex)
     {
         if (Tableau == null || pileIndex < 0 || pileIndex >= Tableau.Count || Tableau[pileIndex] == null || Tableau[pileIndex].Count == 0) return;
@@ -290,6 +318,13 @@ public partial class AcesUp : ComponentBase, IDisposable
     [JSInvokable]
     public async Task OnButtonHoverClick(string buttonId)
     {
+        // Do not allow hover-to-click for navigation buttons (Home and Rules)
+        if (buttonId == "home" || buttonId == "rules")
+        {
+            Console.WriteLine($"OnButtonHoverClick: Ignoring hover action for {buttonId}");
+            return;
+        }
+
         // Allow the autoplay-toggle to be activated even when autoPlayEnabled is currently false
         if (buttonId != "autoplay-toggle" && !autoPlayEnabled) return;
 
@@ -390,6 +425,7 @@ public partial class AcesUp : ComponentBase, IDisposable
     public void Dispose()
     {
         toastTimer?.Dispose();
+        hoverDisabledTimer?.Dispose();
     }
 
     /// <summary>

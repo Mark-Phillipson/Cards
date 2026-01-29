@@ -46,40 +46,10 @@
             }
         </div>
             <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
-            <button class="acesup-btn" accesskey="h" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="GoHome" data-hoverable="true" data-button-id="home">Home <span style="font-size:0.85em;opacity:0.7;">(Alt+H)</span></button>
-            @if (hoverProgress.ContainsKey(-6) && hoverProgress[-6] > 0)
-            {
-                var circumference = 2 * Math.PI * 12;
-                var dashArray = $"{circumference * hoverProgress[-6] / 100} {circumference}";
-                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
-                    <circle cx="18" cy="18" r="12"
-                            stroke="#1976d2"
-                            stroke-width="3"
-                            fill="transparent"
-                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
-                </svg>
-                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
-                    @hoverProgress[-6]%
-                </div>
-            }
+            <button class="acesup-btn" accesskey="h" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="GoHome" @onmouseenter="ShowHoverDisabledToastHome" @onfocus="ShowHoverDisabledToastHome" title="Hover-to-click disabled for navigation buttons" data-hoverable="false" data-button-id="home">Home <span style="font-size:0.85em;opacity:0.7;">(Alt+H)</span></button>
         </div>
             <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
-            <button class="acesup-btn" accesskey="r" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowRulesModal" data-hoverable="true" data-button-id="rules">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
-            @if (hoverProgress.ContainsKey(-7) && hoverProgress[-7] > 0)
-            {
-                var circumference = 2 * Math.PI * 12;
-                var dashArray = $"{circumference * hoverProgress[-7] / 100} {circumference}";
-                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
-                    <circle cx="18" cy="18" r="12"
-                            stroke="#1976d2"
-                            stroke-width="3"
-                            fill="transparent"
-                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
-                </svg>
-                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
-                    @hoverProgress[-7]%
-                </div>
-            }
+            <button class="acesup-btn" accesskey="r" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowRulesModal" @onmouseenter="ShowHoverDisabledToastRules" @onfocus="ShowHoverDisabledToastRules" title="Hover-to-click disabled for navigation buttons" data-hoverable="false" data-button-id="rules">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
         </div>
             <div style="margin-top: 16px; width: 150px;">
                 <label style="display: flex; align-items: center; cursor: pointer; color: #333; font-size: 0.95em; font-weight: 600;" data-hoverable="true" data-button-id="autoplay-toggle">
@@ -115,6 +85,7 @@
                     }
                 </div>
                 <div aria-live="polite" aria-atomic="true" style="position: absolute; left: -10000px;">@autoPlayStatusMessage</div>
+                <div aria-live="polite" aria-atomic="true" style="position: absolute; left: -10000px;">@hoverDisabledStatusMessage</div>
             </div>
         </div>
 @if (showRulesModal)
