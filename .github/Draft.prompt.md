@@ -1,4 +1,6 @@
 
-Currently the aces up card game implements the functionality to be able to auto click the mouse after a delay.
+Can we change the buttons from blue to orange?
 
- can we plan out how to add the same functionality to the strip jack naked card game
+Also can we make the default milliseconds one thousand for the delay before auto submit
+
+ also when we hover over the information button for the delay to show the tooltip can it not disappear the reason being when you have an eye tracker and you try to read the text it automatically disappears because you're not looking directly at the information button making this a accessibility fail
