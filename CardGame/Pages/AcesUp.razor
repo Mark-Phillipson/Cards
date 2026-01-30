@@ -10,24 +10,6 @@
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; max-width: 700px; margin-bottom: 12px;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start;">
             <div style="position: relative; width: 150px; min-width: 150px; max-width: 150px;">
-            <button class="acesup-btn" accesskey="n" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowNewGameConfirmButtons" data-hoverable="true" data-button-id="new-game">New <span style="font-size:0.85em;opacity:0.7;">(Alt+N)</span></button>
-            @if (hoverProgress.ContainsKey(-2) && hoverProgress[-2] > 0)
-            {
-                var circumference = 2 * Math.PI * 12;
-                var dashArray = $"{circumference * hoverProgress[-2] / 100} {circumference}";
-                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
-                    <circle cx="18" cy="18" r="12"
-                            stroke="#f57c00"
-                            stroke-width="3"
-                            fill="transparent"
-                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
-                </svg>
-                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
-                    @hoverProgress[-2]%
-                </div>
-            }
-        </div>
-            <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
             <button class="acesup-btn" accesskey="u" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="Undo" disabled="@(!CanUndo)" data-hoverable="@(CanUndo ? "true" : "false")" data-button-id="undo">Undo <span style="font-size:0.85em;opacity:0.7;">(Alt+U)</span></button>
             @if (hoverProgress.ContainsKey(-5) && hoverProgress[-5] > 0)
             {
@@ -51,6 +33,27 @@
             <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
             <button class="acesup-btn" accesskey="r" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowRulesModal" @onmouseenter="ShowHoverDisabledToastRules" @onfocus="ShowHoverDisabledToastRules" title="Hover-to-click disabled for navigation buttons" data-hoverable="false" data-button-id="rules">Rules <span style="font-size:0.85em;opacity:0.7;">(Alt+R)</span></button>
         </div>
+            <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
+            <button class="acesup-btn" accesskey="n" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ShowNewGameConfirmButtons" data-hoverable="true" data-button-id="new-game">New <span style="font-size:0.85em;opacity:0.7;">(Alt+N)</span></button>
+            @if (hoverProgress.ContainsKey(-2) && hoverProgress[-2] > 0)
+            {
+                var circumference = 2 * Math.PI * 12;
+                var dashArray = $"{circumference * hoverProgress[-2] / 100} {circumference}";
+                <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
+                    <circle cx="18" cy="18" r="12"
+                            stroke="#f57c00"
+                            stroke-width="3"
+                            fill="transparent"
+                            style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
+                </svg>
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
+                    @hoverProgress[-2]%
+                </div>
+            }
+        </div>
+            <div style="position: relative; margin-top: 8px; width: 150px; min-width: 150px; max-width: 150px;">
+            <button class="acesup-btn" accesskey="b" style="width: 150px; min-width: 150px; max-width: 150px;" @onclick="ChangeBackground" @onmouseenter="ShowHoverDisabledToastBackground" @onfocus="ShowHoverDisabledToastBackground" title="Hover-to-click disabled for background button" data-hoverable="false" data-button-id="background">Background <span style="font-size:0.85em;opacity:0.7;">(Alt+B)</span></button>
+        </div>
         </div>
 @if (showRulesModal)
 {
@@ -69,8 +72,7 @@
     private string autoPlayStatusMessage = "";
     private bool showHelpTooltip = false;
     
-    private void ShowHelpTooltip() { showHelpTooltip = true; StateHasChanged(); }
-    private void HideHelpTooltip() { showHelpTooltip = false; StateHasChanged(); }
+    private void ToggleHelpTooltip() { showHelpTooltip = !showHelpTooltip; StateHasChanged(); }
     
     private void ShowNewGameConfirmButtons()
     {
@@ -91,6 +93,11 @@
     }
     private void ShowRulesModal() => showRulesModal = true;
     private void HideRulesModal() => showRulesModal = false;
+
+    private async Task ChangeBackground()
+    {
+        await JS.InvokeVoidAsync("AcesUpBackground.setRandomBackground");
+    }
 
     private string debugMessage = "";
     private System.Timers.Timer? debugTimer;
@@ -164,6 +171,9 @@
             case "n":
                 ShowNewGameConfirmButtons();
                 break;
+            case "b":
+                await ChangeBackground();
+                break;
         }
         await InvokeAsync(StateHasChanged);
     }
@@ -216,10 +226,10 @@
                 <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
                     <label style="font-size:0.9em; color:#333; display:flex; align-items:center;">
                         <span>Delay before auto-submit (ms)</span>
-                        <span tabindex="0" role="img" aria-label="Help: Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50 to 10000, default 1000." style="margin-left:8px; cursor:help; color:#666; font-size:0.95em; position:relative;" @onmouseenter="ShowHelpTooltip" @onmouseleave="HideHelpTooltip" @onfocus="ShowHelpTooltip" @onblur="HideHelpTooltip">&#x1F6C8;
+                        <span tabindex="0" role="img" aria-label="Help: Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50 to 10000, default 1000." style="margin-left:8px; cursor:help; color:#666; font-size:0.95em; position:relative;" @onmouseenter="ToggleHelpTooltip" @onclick="ToggleHelpTooltip" @onfocus="ToggleHelpTooltip">&#x1F6C8;
                             @if (showHelpTooltip)
                             {
-                                <span @onmouseenter="ShowHelpTooltip" @onmouseleave="HideHelpTooltip" style="position:absolute; left:30px; top:-10px; background:#333; color:#fff; padding:8px 12px; border-radius:6px; font-size:0.85em; white-space:nowrap; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); pointer-events:auto;">Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50–10000. Default 1000.</span>
+                                <span style="position:absolute; left:30px; top:-10px; background:#333; color:#fff; padding:8px 12px; border-radius:6px; font-size:0.85em; white-space:nowrap; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); pointer-events:auto;">Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50–10000. Default 1000.</span>
                             }
                         </span>
                     </label>

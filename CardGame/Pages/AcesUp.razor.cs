@@ -222,6 +222,7 @@ public partial class AcesUp : ComponentBase, IDisposable
 
     private void ShowHoverDisabledToastHome() => ShowHoverDisabledToast("Home");
     private void ShowHoverDisabledToastRules() => ShowHoverDisabledToast("Rules");
+    private void ShowHoverDisabledToastBackground() => ShowHoverDisabledToast("Background");
 
     public void TryMoveToEmpty(int pileIndex)
     {
