@@ -17,12 +17,12 @@
                 var dashArray = $"{circumference * hoverProgress[-2] / 100} {circumference}";
                 <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
                     <circle cx="18" cy="18" r="12"
-                            stroke="#1976d2"
+                            stroke="#f57c00"
                             stroke-width="3"
                             fill="transparent"
                             style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                 </svg>
-                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
                     @hoverProgress[-2]%
                 </div>
             }
@@ -35,12 +35,12 @@
                 var dashArray = $"{circumference * hoverProgress[-5] / 100} {circumference}";
                 <svg style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none;" width="36" height="36">
                     <circle cx="18" cy="18" r="12"
-                            stroke="#1976d2"
+                            stroke="#f57c00"
                             stroke-width="3"
                             fill="transparent"
                             style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                 </svg>
-                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                <div style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
                     @hoverProgress[-5]%
                 </div>
             }
@@ -67,6 +67,10 @@
     private bool autoPlayEnabled = false;
     private Dictionary<int, int> hoverProgress = new();
     private string autoPlayStatusMessage = "";
+    private bool showHelpTooltip = false;
+    
+    private void ShowHelpTooltip() { showHelpTooltip = true; StateHasChanged(); }
+    private void HideHelpTooltip() { showHelpTooltip = false; StateHasChanged(); }
     
     private void ShowNewGameConfirmButtons()
     {
@@ -197,12 +201,12 @@
                         var dashArray = $"{circumference * hoverProgress[-8] / 100} {circumference}";
                         <svg style="position: absolute; top: 50%; right: -26px; transform: translateY(-50%); pointer-events: none;" width="24" height="24">
                             <circle cx="12" cy="12" r="8"
-                                    stroke="#1976d2"
+                                    stroke="#f57c00"
                                     stroke-width="2"
                                     fill="transparent"
                                     style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                         </svg>
-                        <div style="position: absolute; top: 50%; right: -26px; transform: translateY(-50%); pointer-events: none; font-size: 0.75em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                        <div style="position: absolute; top: 50%; right: -26px; transform: translateY(-50%); pointer-events: none; font-size: 0.75em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
                             @hoverProgress[-8]%
                         </div>
                     }
@@ -212,7 +216,12 @@
                 <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
                     <label style="font-size:0.9em; color:#333; display:flex; align-items:center;">
                         <span>Delay before auto-submit (ms)</span>
-                        <span title="Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50–10000. Default 500." tabindex="0" role="img" aria-label="Help: Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50 to 10000, default 500." style="margin-left:8px; cursor:help; color:#666; font-size:0.95em;">&#x1F6C8;</span>
+                        <span tabindex="0" role="img" aria-label="Help: Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50 to 10000, default 1000." style="margin-left:8px; cursor:help; color:#666; font-size:0.95em; position:relative;" @onmouseenter="ShowHelpTooltip" @onmouseleave="HideHelpTooltip" @onfocus="ShowHelpTooltip" @onblur="HideHelpTooltip">&#x1F6C8;
+                            @if (showHelpTooltip)
+                            {
+                                <span @onmouseenter="ShowHelpTooltip" @onmouseleave="HideHelpTooltip" style="position:absolute; left:30px; top:-10px; background:#333; color:#fff; padding:8px 12px; border-radius:6px; font-size:0.85em; white-space:nowrap; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); pointer-events:auto;">Delay in milliseconds before an auto-action triggers after you stop hovering. Range 50–10000. Default 1000.</span>
+                            }
+                        </span>
                     </label>
                     <input type="number" min="50" max="10000" value="@hoverDelayMs" @oninput="OnHoverDelayInput" style="width:100%; padding:6px; border-radius:4px; border:1px solid #ccc;" />
                     @if (!string.IsNullOrEmpty(hoverDelayError))
@@ -240,12 +249,12 @@
                             var dashArray = $"{circumference * hoverProgress[-4] / 100} {circumference}";
                             <svg style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none;" width="30" height="30">
                                 <circle cx="15" cy="15" r="10"
-                                        stroke="#1976d2"
+                                        stroke="#f57c00"
                                         stroke-width="3"
                                         fill="transparent"
                                         style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                             </svg>
-                            <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                            <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
                                 @hoverProgress[-4]%
                             </div>
                         }
@@ -258,12 +267,12 @@
                             var dashArray = $"{circumference * hoverProgress[-3] / 100} {circumference}";
                             <svg style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none;" width="30" height="30">
                                 <circle cx="15" cy="15" r="10"
-                                        stroke="#1976d2"
+                                        stroke="#f57c00"
                                         stroke-width="3"
                                         fill="transparent"
                                         style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                             </svg>
-                            <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white;">
+                            <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); pointer-events: none; font-size: 0.85em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white;">
                                 @hoverProgress[-3]%
                             </div>
                         }
@@ -284,12 +293,12 @@
                         <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"
                              width="50" height="50">
                             <circle cx="25" cy="25" r="16"
-                                    stroke="#1976d2"
+                                    stroke="#f57c00"
                                     stroke-width="4"
                                     fill="transparent"
                                     style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                         </svg>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: 1.2em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: 1.2em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;">
                             @hoverProgress[-1]%
                         </div>
                     }
@@ -345,12 +354,12 @@
                                         <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"
                                              width="50" height="50">
                                             <circle cx="25" cy="25" r="16"
-                                                    stroke="#1976d2"
+                                                    stroke="#f57c00"
                                                     stroke-width="4"
                                                     fill="transparent"
                                                     style="stroke-dasharray: @dashArray; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray 0.05s linear;" />
                                         </svg>
-                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: 1.2em; font-weight: bold; color: #1976d2; text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;">
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: 1.2em; font-weight: bold; color: #f57c00; text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;">
                                             @hoverProgress[localIndex]%
                                         </div>
                                     }
@@ -376,27 +385,27 @@
     </div>
     <style>
         .acesup-btn {
-            background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+            background: linear-gradient(90deg, #f57c00 0%, #ff9800 100%);
             color: #fff;
             border: none;
             border-radius: 6px;
             padding: 10px 0;
             font-size: 1.1em;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+            box-shadow: 0 2px 8px rgba(245, 124, 0, 0.08);
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
             margin-bottom: 4px;
             text-align: center;
         }
         .acesup-btn:hover, .acesup-btn:focus {
-            background: linear-gradient(90deg, #1565c0 0%, #1e88e5 100%);
+            background: linear-gradient(90deg, #e65100 0%, #f57c00 100%);
             transform: translateY(-2px) scale(1.04);
         }
         .acesup-btn:focus {
-            outline: 3px solid #ff9800;
+            outline: 3px solid #1976d2;
             outline-offset: 2px;
-            box-shadow: 0 0 0 4px #ffe0b2;
+            box-shadow: 0 0 0 4px #bbdefb;
             z-index: 10;
         }
         .acesup-btn:disabled {

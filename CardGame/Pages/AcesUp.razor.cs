@@ -367,7 +367,7 @@ public partial class AcesUp : ComponentBase, IDisposable
         StateHasChanged();
     }
 
-    private int hoverDelayMs = 500;
+    private int hoverDelayMs = 1000;
     private string hoverDelayError = "";
 
     private async Task OnHoverDelayInput(ChangeEventArgs e)
